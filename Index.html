@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نمایش گفتگوهای NATI</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<style>
+body { background:#f6f6fb; overflow:hidden; height:100vh; display:flex; direction:rtl; }
+#sidebar { width:260px; min-width:60px; max-width:400px; background:#fff; border-left:1px solid #ddd; overflow-y:auto; padding:12px; box-shadow:-2px 0 6px rgba(0,0,0,0.05); transition: width 0.3s ease; }
+#sidebar.collapsed { width:0; padding:0; overflow:hidden; }
+#toggleSidebar { position:fixed; top:10px; right:10px; z-index:1100; background:#007bff; color:#fff; border:none; padding:6px 10px; cursor:pointer; border-radius:4px; }
+#main { flex:1; padding:16px; overflow-y:auto; transition: margin-right 0.3s ease; margin-right:260px; }
+#sidebar.collapsed + #main { margin-right:0; }
+.sheet-item { padding:10px; margin:6px 0; border-radius:6px; cursor:pointer; border:1px solid #e0e0ef; background:#fafafa; font-size:15px; }
+.sheet-item:hover { background:#eef; }
+.sheet-item.active { background:#dde5ff; border-color:#b9c6ff; }
+.toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:1055; }
+.recording-indicator { width:10px; height:10px; background:red; border-radius:50%; margin-left:6px; animation:blink 1s infinite; display:none; }
+@keyframes blink {0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
+.btn-fixed { height:32px; font-size:13px; line-height:1; padding:0 4px; overflow:hidden; display:block; width:100%; }
+td.row-number { width:5%; text-align:center; vertical-align:middle; }
+td.controls-cell { width:10%; }
+td.dialog-cell { width:85%; text-align:center; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+<h3>گفتگوها</h3>
+<div id="sheetList">— بارگذاری فایل پیش‌فرض —</div>
+<hr>
+<div id="audioInputContainer" class="mb-2" style="display:none">
+<label>فایل‌های صوتی (یکجا):</label>
+<input id="audioFiles" type="file" accept="audio/*" multiple class="form-control form-control-sm">
+</div>
+</div>
+
+<button id="toggleSidebar" onclick="toggleSidebar()">☰</button>
+
+<div id="main">
+<h2 id="sheetTitle">گفتگو</h2>
+<div id="tableContainer">— هیچ شیتی انتخاب نشده —</div>
+</div>
+
+<div id="toast" class="toast align-items-center text-white bg-dark border-0" role="alert"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let workbook=null,currentAudio=null,currentBtn=null,mediaRecorder=null,recordedChunks=[],mediaStream=null;
+const sheetList=document.getElementById('sheetList');
+const audioInput=document.getElementById('audioFiles');
+const audioInputContainer=document.getElementById('audioInputContainer');
+const tableContainer=document.getElementById('tableContainer');
+const sheetTitle=document.getElementById('sheetTitle');
+const toastEl=document.getElementById('toast');
+const sidebar=document.getElementById('sidebar');
+const bsToast=new bootstrap.Toast(toastEl);
+
+function showToast(msg){ toastEl.textContent=msg; bsToast.show(); }
+
+async function loadDefaultExcel() {
+  try {
+    const response = await fetch('Conversations.xlsx');
+    const arrayBuffer = await response.arrayBuffer();
+    workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    renderSheetList();
+    if(workbook.SheetNames.length > 0){
+      const firstSheet = document.createElement('div');
+      firstSheet.className='sheet-item';
+      firstSheet.textContent = workbook.SheetNames[0];
+      sheetList.appendChild(firstSheet);
+      selectSheet(workbook.SheetNames[0], firstSheet);
+    }
+  } catch(err) {
+    console.error('خطا در بارگذاری فایل پیش‌فرض:', err);
+    sheetList.textContent = '— فایل پیش‌فرض پیدا نشد —';
+  }
+}
+
+audioInput.addEventListener('change', e=>{
+  audioFilesSorted=[...e.target.files].sort((a,b)=>a.name.localeCompare(b.name));
+});
+
+function renderSheetList(){
+  sheetList.innerHTML='';
+  workbook.SheetNames.forEach(name=>{
+    const div=document.createElement('div');
+    div.className='sheet-item'; div.textContent=name;
+    div.onclick=()=>selectSheet(name,div);
+    sheetList.appendChild(div);
+  });
+}
+
+function selectSheet(name,element){
+  [...document.querySelectorAll('.sheet-item')].forEach(el=>el.classList.remove('active'));
+  element.classList.add('active');
+  sheetTitle.textContent=`گفتگو: ${name}`;
+  showToast(`دیالوگ: ${name}`);
+  loadSheet(name);
+  audioInputContainer.style.display='block';
+}
+
+function loadSheet(name){
+  const ws=workbook.Sheets[name];
+  const json=XLSX.utils.sheet_to_json(ws,{header:1});
+  let html=`<table class="table table-striped table-bordered align-middle" style="table-layout: fixed;">
+  <colgroup>
+    <col style="width:5%">
+    <col style="width:10%">
+    <col style="width:85%">
+  </colgroup>
+  <thead class="table-dark"><tr><th>ردیف</th><th>کنترل‌ها</th><th>متن</th></tr></thead>
+  <tbody>`;
+  
+  for(let i=1;i<json.slice(1).length;i+=2){
+    const idx=Math.floor((i-1)/2);
+    html+='<tr>';
+    html+=`<td class="row-number">${idx+1}</td>`;
+    let combinedText='';
+    for(let j=i;j<i+2 && j<json.slice(1).length;j++){
+      if(json[j].length>0) combinedText+=`<span>${json[j].join(' ')}</span>`;
+    }
+    html+=`<td class="controls-cell">
+<button class="btn btn-primary btn-fixed mb-1" onclick="toggleAudio(${idx},this)">▶ پخش</button>
+<button class="btn btn-secondary btn-fixed mb-1" onclick="toggleText(${idx})">نمایش/مخفی</button>
+<audio id="myAudio_${idx}" controls class="w-100 mt-1" style="display:none"></audio>
+</td>`;
+    html+=`<td class="dialog-cell" id="dialog_${idx}" style="display:none">${combinedText}</td>`;
+    html+='</tr>';
+  }
+  html+='</tbody></table>';
+  tableContainer.innerHTML=html;
+}
+
+function toggleAudio(index,btn){
+  if(currentAudio && !currentAudio.paused){ 
+    currentAudio.pause(); 
+    if(currentBtn) currentBtn.textContent='▶ پخش'; 
+    if(currentAudio.datasetIndex==index){ currentAudio=null;currentBtn=null; return; } 
+  }
+  currentAudio=new Audio(`audio${index+1}.mp3`);
+  currentAudio.datasetIndex=index; currentBtn=btn; btn.textContent='⏹ توقف'; currentAudio.play();
+  currentAudio.onended=()=>{ btn.textContent='▶ پخش'; currentAudio=null;currentBtn=null; };
+}
+
+function toggleText(index){
+  const el=document.getElementById(`dialog_${index}`);
+  el.style.display=(el.style.display==='none'||el.style.display==='')?'block':'none';
+}
+
+function toggleSidebar(){
+  sidebar.classList.toggle('collapsed');
+}
+
+window.onload = loadDefaultExcel;
+</script>
+
+</body>
+</html>
