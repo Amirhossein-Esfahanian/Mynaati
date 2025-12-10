@@ -2,32 +2,24 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>نمایش گفتگوهای NATI</title>
     <link rel="stylesheet" href="/Files/bootstrap.rtl.min.css" />
     <style>
       body {
         background: #f6f6fb;
-        overflow: hidden;
+        margin: 0;
         height: 100vh;
         display: flex;
-        direction: rtl;
-      }
-      #sidebar {
-        width: 260px;
-        min-width: 60px;
-        max-width: 400px;
-        background: #fff;
-        border-left: 1px solid #ddd;
-        overflow-y: auto;
-        padding: 12px;
-        box-shadow: -2px 0 6px rgba(0, 0, 0, 0.05);
-        transition: width 0.3s ease;
-      }
-      #sidebar.collapsed {
-        width: 0;
-        padding: 0;
+        flex-direction: row;
         overflow: hidden;
+      }
+
+      #main {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        direction: rtl;
       }
       #toggleSidebar {
         position: fixed;
@@ -41,15 +33,6 @@
         cursor: pointer;
         border-radius: 4px;
       }
-      #main {
-        flex: 1;
-        padding: 16px;
-        overflow-y: auto;
-        transition: margin-right 0.3s ease;
-      }
-      #sidebar.collapsed + #main {
-        margin-right: 0;
-      }
       .sheet-item {
         padding: 10px;
         margin: 6px 0;
@@ -57,7 +40,6 @@
         cursor: pointer;
         border: 1px solid #e0e0ef;
         background: #fafafa;
-        font-size: 15px;
       }
       .sheet-item:hover {
         background: #eef;
@@ -66,12 +48,27 @@
         background: #dde5ff;
         border-color: #b9c6ff;
       }
-      .toast {
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1055;
+      td.row-number {
+        width: 5%;
+        min-width: 70px;
+        text-align: center;
+        vertical-align: middle;
+      }
+      td.controls-cell {
+        width: 10%;
+        min-width: 120px;
+      }
+      td.dialog-cell {
+        width: 85%;
+        text-align: center;
+        word-wrap: break-word;
+      }
+      .btn-fixed {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        font-size: 18px;
+        text-align: center;
       }
       .recording-indicator {
         width: 10px;
@@ -93,72 +90,105 @@
           opacity: 0;
         }
       }
-      .btn-fixed {
-        height: 32px;
-        font-size: 13px;
-        line-height: 1;
-        padding: 0 4px;
-        overflow: hidden;
-        display: block;
-        width: 100%;
+      #toast {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2000;
+        min-width: 200px;
       }
-      td.row-number {
-        width: 5%;
-        text-align: center;
-        vertical-align: middle;
+
+      /* #sidebar.collapsed {
+        transform: translateX(100%);
+
+        left: 0;
+      } */
+
+      #sidebar {
+        width: 260px;
+        background: #fff;
+        padding: 12px;
+        border-left: 1px solid #ddd;
+        overflow-y: auto;
+        box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        flex-shrink: 0;
       }
-      td.controls-cell {
-        width: 10%;
+      #sidebar.collapsed {
+        width: 00px;
+        transition: width 0.4s ease;
+        /* transform: translateX(100%); */
       }
-      td.dialog-cell {
-        width: 85%;
-        text-align: center;
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+        #sidebar {
+          position: fixed;
+          top: 0;
+          left: 250px;
+          height: 100%;
+          width: 80%;
+          max-width: 260px;
+          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+          transform: translateX(-100%);
+          z-index: 1050;
+        }
+        #sidebar.collapsed {
+          /* transform: translateX(-100%); */
+          transition: width 0.4s ease;
+          left: 0;
+        }
+        #main {
+          padding: 10px;
+          margin-left: 0;
+        }
+        #toggleSidebar {
+          left: 10px;
+          right: auto;
+        }
+        table {
+          width: 100%;
+          font-size: 14px;
+        }
+        td.controls-cell,
+        td.row-number {
+          white-space: nowrap;
+        }
       }
     </style>
   </head>
   <body>
     <div id="sidebar">
       <h3>گفتگوها</h3>
-      <div id="sheetList">— بارگذاری فایل پیش‌فرض —</div>
-      <hr />
+      <div id="sheetList">در حال بارگذاری…</div>
     </div>
-
-    <button id="toggleSidebar" onclick="toggleSidebar()">☰</button>
 
     <div id="main">
       <h2 id="sheetTitle">گفتگو</h2>
       <div id="tableContainer">— هیچ شیتی انتخاب نشده —</div>
     </div>
 
-    <div
-      id="toast"
-      class="toast align-items-center text-white bg-dark border-0"
-      role="alert"
-    ></div>
+    <button id="toggleSidebar" onclick="toggleSidebar()">☰</button>
+    <div id="toast" class="toast text-white bg-dark border-0"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="/Files/xlsx.full.min.js"></script>
+    <script src="/Files/bootstrap.bundle.min.js"></script>
     <script>
       let workbook = null,
         currentAudio = null,
-        currentBtn = null;
-      let mediaRecorder = null,
+        currentBtn = null,
+        mediaRecorder = null,
         recordedChunks = [],
         mediaStream = null;
       const sheetList = document.getElementById("sheetList");
       const tableContainer = document.getElementById("tableContainer");
       const sheetTitle = document.getElementById("sheetTitle");
       const toastEl = document.getElementById("toast");
-      const sidebar = document.getElementById("sidebar");
       const bsToast = new bootstrap.Toast(toastEl);
-
-      // لیست فولدرهای گفتگو
-      const audioFolders = [
-        "1-Respite Care Services",
-        "2-Another Conversation",
-      ]; // نام فولدرها را اینجا لیست کنید
-
       function showToast(msg) {
         toastEl.textContent = msg;
         bsToast.show();
@@ -170,23 +200,21 @@
           const arrayBuffer = await response.arrayBuffer();
           workbook = XLSX.read(arrayBuffer, { type: "array" });
           renderSheetList();
-          if (workbook.SheetNames.length > 0) {
-            const first = workbook.SheetNames[0];
-            const el = sheetList.querySelector(".sheet-item");
-            selectSheet(first, el);
-          }
+          const first = workbook.SheetNames[0];
+          const el = sheetList.querySelector(".sheet-item");
+          selectSheet(first, el);
         } catch (err) {
-          console.error("خطا در بارگذاری:", err);
-          sheetList.textContent = "— فایل پیش‌فرض پیدا نشد —";
+          sheetList.textContent = "فایل پیدا نشد";
         }
       }
 
       function renderSheetList() {
         sheetList.innerHTML = "";
-        workbook.SheetNames.forEach((name) => {
+        workbook.SheetNames.forEach((name, idx) => {
           const div = document.createElement("div");
           div.className = "sheet-item";
           div.textContent = name;
+          div.dataset.folderNumber = idx + 1;
           div.onclick = () => selectSheet(name, div);
           sheetList.appendChild(div);
         });
@@ -198,70 +226,94 @@
         );
         element.classList.add("active");
         sheetTitle.textContent = `گفتگو: ${name}`;
-        showToast(`دیالوگ: ${name}`);
-        loadSheet(name);
+        const folderNumber = element.dataset.folderNumber;
+        loadSheet(name, folderNumber);
       }
 
-      function loadSheet(name) {
+      function loadSheet(name, folderNumber) {
         const ws = workbook.Sheets[name];
         const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        let html = `<table class="table table-striped table-bordered align-middle" style="table-layout:fixed;">
-                <colgroup><col style="width:5%"><col style="width:10%"><col style="width:85%"></colgroup>
-                <thead class="table-dark"><tr><th>ردیف</th><th>کنترل‌ها</th><th>متن</th></tr></thead><tbody>`;
-
-        for (let i = 1; i < json.slice(1).length; i += 2) {
-          const idx = Math.floor((i - 1) / 2);
+        const folderName = encodeURIComponent(name.trim());
+        let html = `<table class="table table-striped table-bordered table-responsive" style="table-layout:fixed;">
+  <colgroup><col style="width:5%; min-width:60px;"><col style="width:12%; "><col style=""></colgroup>
+  <thead class="table-dark"><tr><th>ردیف</th><th>کنترل‌ها</th><th>متن</th></tr></thead><tbody>`;
+        const rows = json.slice(1);
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length === 0) continue;
           let combined = "";
-          for (let j = i; j < i + 2 && j < json.slice(1).length; j++) {
-            if (json[j].length > 0)
-              combined += `<span>${json[j].join(" ")}</span><br>`;
-          }
-
-          // پیدا کردن فولدر مطابق شماره ردیف
-          const folder = audioFolders.find(
-            (f) => parseInt(f.split("-")[0]) === idx + 1
-          );
-          const folderPath = folder ? `/Files/Audio/${folder}` : null;
-          const rowNum = String(idx + 1).padStart(3, "0");
-
+          for (let j = 0; j < row.length; j++) combined += `${row[j]} `;
+          const displayRowNumber = i + 1;
+          const rowNum = String(folderNumber).padStart(3, "0");
+          const sentenceNum = String(displayRowNumber).padStart(2, "0");
           html += `<tr>
-                    <td class="row-number">${idx + 1}</td>
-                    <td class="controls-cell">
-                        <button class="btn btn-primary btn-fixed mb-1" onclick="toggleAudio(${idx},this)">▶ پخش</button>
-                        <button class="btn btn-secondary btn-fixed mb-1" onclick="toggleText(${idx})">نمایش/مخفی</button>
-                        <button class="btn btn-danger btn-fixed mb-1" onclick="startRecording(${idx})">🎙 ضبط</button>
-                        <button class="btn btn-warning btn-fixed mb-1" onclick="stopRecording(${idx})">■ توقف</button>
-                        <span id="rec_${idx}" class="recording-indicator"></span>
-                        <audio id="myAudio_${idx}" controls class="w-100 mt-1" style="display:none"
-                               ${
-                                 folderPath
-                                   ? `src="${folderPath}/${rowNum}-01.mp3"`
-                                   : ""
-                               }></audio>
-                    </td>
-                    <td class="dialog-cell" id="dialog_${idx}" style="display:none">${combined}</td>
-                </tr>`;
+    <td class="row-number">${displayRowNumber}</td>
+    <td class="controls-cell">
+      <button class="btn btn-primary btn-fixed mb-1" onclick="toggleAudioWithFallback(${folderNumber},'${folderName}','${rowNum}','${sentenceNum}',this)">▶</button>
+      <button class="btn btn-secondary btn-fixed mb-1" onclick="toggleText(${i})">📝</button>
+      <button class="btn btn-danger btn-fixed mb-1" onclick="startRecording(${i})">🎙</button>
+      <button class="btn btn-warning btn-fixed mb-1" onclick="stopRecording(${i})">■</button>
+      <span id="rec_${i}" class="recording-indicator"></span>
+      <audio id="myAudio_${i}" controls class="w-100 mt-1" style="display:none"></audio>
+    </td>
+    <td class="dialog-cell" id="dialog_${i}" style="display:none">${combined}</td>
+    </tr>`;
         }
-
         html += "</tbody></table>";
         tableContainer.innerHTML = html;
       }
 
-      function toggleAudio(index, btn) {
-        const audioEl = document.getElementById(`myAudio_${index}`);
-        if (!audioEl.src) {
-          showToast("فایل صوتی پیدا نشد");
-          return;
+      async function getAudioPath(
+        folderNumber,
+        folderName,
+        rowNum,
+        sentenceNum
+      ) {
+        const dashPath = `/Files/Audio/${folderNumber}-${folderName}/${rowNum}-${sentenceNum}.mp3`;
+        const underscorePath = `/Files/Audio/${folderNumber}-${folderName}/${rowNum}_${sentenceNum}.mp3`;
+        try {
+          const res = await fetch(dashPath, { method: "HEAD" });
+          if (res.ok) return dashPath;
+          else return underscorePath;
+        } catch (e) {
+          return underscorePath;
         }
-        if (!audioEl.paused) {
-          audioEl.pause();
-          btn.textContent = "▶ پخش";
-          return;
+      }
+
+      async function toggleAudioWithFallback(
+        folderNumber,
+        folderName,
+        rowNum,
+        sentenceNum,
+        btn
+      ) {
+        if (currentAudio && !currentAudio.paused) {
+          if (currentBtn === btn) {
+            currentAudio.pause();
+            currentBtn.textContent = "▶";
+            currentAudio = null;
+            currentBtn = null;
+            return;
+          }
+          currentAudio.pause();
+          if (currentBtn) currentBtn.textContent = "▶";
+          currentAudio = null;
+          currentBtn = null;
         }
-        audioEl.play();
-        btn.textContent = "⏹ توقف";
-        audioEl.onended = () => {
-          btn.textContent = "▶ پخش";
+        const audioSrc = await getAudioPath(
+          folderNumber,
+          folderName,
+          rowNum,
+          sentenceNum
+        );
+        currentAudio = new Audio(audioSrc);
+        currentBtn = btn;
+        btn.textContent = "⏹";
+        currentAudio.play();
+        currentAudio.onended = () => {
+          btn.textContent = "▶";
+          currentAudio = null;
+          currentBtn = null;
         };
       }
 
@@ -307,7 +359,7 @@
       }
 
       function toggleSidebar() {
-        sidebar.classList.toggle("collapsed");
+        document.getElementById("sidebar").classList.toggle("collapsed");
       }
 
       window.onload = loadDefaultExcel;
