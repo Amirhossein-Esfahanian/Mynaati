@@ -269,8 +269,8 @@
         rowNum,
         sentenceNum
       ) {
-        const dashPath = `/Files/Audio/${folderNumber}-${folderName}/${rowNum}-${sentenceNum}.mp3`;
-        const underscorePath = `/Files/Audio/${folderNumber}-${folderName}/${rowNum}_${sentenceNum}.mp3`;
+        const dashPath = `Files/Audio/${folderNumber}-${folderName}/${rowNum}-${sentenceNum}.mp3`;
+        const underscorePath = `Files/Audio/${folderNumber}-${folderName}/${rowNum}_${sentenceNum}.mp3`;
         try {
           const res = await fetch(dashPath, { method: "HEAD" });
           if (res.ok) return dashPath;
