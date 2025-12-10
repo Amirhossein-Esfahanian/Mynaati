@@ -4,14 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>نمایش گفتگوهای NATI</title>
-    <!-- <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"
-
-      rel="stylesheet"
-    /> -->
     <link rel="stylesheet" href="/Files/bootstrap.rtl.min.css" />
-    <!-- <link src="Files/bootstrap.rtl.min.css" rel="stylesheet" /> -->
-
     <style>
       body {
         background: #f6f6fb;
@@ -53,12 +46,10 @@
         padding: 16px;
         overflow-y: auto;
         transition: margin-right 0.3s ease;
-        /* margin-right: 260px; */
       }
       #sidebar.collapsed + #main {
         margin-right: 0;
       }
-
       .sheet-item {
         padding: 10px;
         margin: 6px 0;
@@ -75,7 +66,6 @@
         background: #dde5ff;
         border-color: #b9c6ff;
       }
-
       .toast {
         position: fixed;
         bottom: 30px;
@@ -83,7 +73,6 @@
         transform: translateX(-50%);
         z-index: 1055;
       }
-
       .recording-indicator {
         width: 10px;
         height: 10px;
@@ -104,7 +93,6 @@
           opacity: 0;
         }
       }
-
       .btn-fixed {
         height: 32px;
         font-size: 13px;
@@ -114,7 +102,6 @@
         display: block;
         width: 100%;
       }
-
       td.row-number {
         width: 5%;
         text-align: center;
@@ -129,28 +116,15 @@
       }
     </style>
   </head>
-
   <body>
-    <!-- Sidebar -->
     <div id="sidebar">
       <h3>گفتگوها</h3>
       <div id="sheetList">— بارگذاری فایل پیش‌فرض —</div>
       <hr />
-      <div id="audioInputContainer" class="mb-2" style="display: none">
-        <label>فایل‌های صوتی (یکجا):</label>
-        <input
-          id="audioFiles"
-          type="file"
-          accept="audio/*"
-          multiple
-          class="form-control form-control-sm"
-        />
-      </div>
     </div>
 
     <button id="toggleSidebar" onclick="toggleSidebar()">☰</button>
 
-    <!-- Main -->
     <div id="main">
       <h2 id="sheetTitle">گفتگو</h2>
       <div id="tableContainer">— هیچ شیتی انتخاب نشده —</div>
@@ -162,12 +136,9 @@
       role="alert"
     ></div>
 
-    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- <script src="Files/xlsx.full.min.js"></script>
-    <script src="Files/bootstrap.bundle.min.js"></script> -->
     <script>
       let workbook = null,
         currentAudio = null,
@@ -175,32 +146,30 @@
       let mediaRecorder = null,
         recordedChunks = [],
         mediaStream = null;
-
       const sheetList = document.getElementById("sheetList");
-      const audioInput = document.getElementById("audioFiles");
-      const audioInputContainer = document.getElementById(
-        "audioInputContainer"
-      );
       const tableContainer = document.getElementById("tableContainer");
       const sheetTitle = document.getElementById("sheetTitle");
       const toastEl = document.getElementById("toast");
       const sidebar = document.getElementById("sidebar");
       const bsToast = new bootstrap.Toast(toastEl);
 
+      // لیست فولدرهای گفتگو
+      const audioFolders = [
+        "1-Respite Care Services",
+        "2-Another Conversation",
+      ]; // نام فولدرها را اینجا لیست کنید
+
       function showToast(msg) {
         toastEl.textContent = msg;
         bsToast.show();
       }
 
-      /* ---------------- Load default Excel ---------------- */
       async function loadDefaultExcel() {
         try {
           const response = await fetch("Conversations.xlsx");
           const arrayBuffer = await response.arrayBuffer();
           workbook = XLSX.read(arrayBuffer, { type: "array" });
-
           renderSheetList();
-
           if (workbook.SheetNames.length > 0) {
             const first = workbook.SheetNames[0];
             const el = sheetList.querySelector(".sheet-item");
@@ -212,7 +181,6 @@
         }
       }
 
-      /* --------------- Render sheet list ------------------ */
       function renderSheetList() {
         sheetList.innerHTML = "";
         workbook.SheetNames.forEach((name) => {
@@ -224,7 +192,6 @@
         });
       }
 
-      /* --------------- Select sheet ------------------ */
       function selectSheet(name, element) {
         [...document.querySelectorAll(".sheet-item")].forEach((el) =>
           el.classList.remove("active")
@@ -233,88 +200,76 @@
         sheetTitle.textContent = `گفتگو: ${name}`;
         showToast(`دیالوگ: ${name}`);
         loadSheet(name);
-        audioInputContainer.style.display = "block";
       }
 
-      /* --------------- Load sheet into table ------------------ */
       function loadSheet(name) {
         const ws = workbook.Sheets[name];
         const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
-
-        let html = `
-  <table class="table table-striped table-bordered align-middle" style="table-layout:fixed;">
-  <colgroup>
-    <col style="width:5%">
-    <col style="width:10%">
-    <col style="width:85%">
-  </colgroup>
-  <thead class="table-dark">
-    <tr><th>ردیف</th><th>کنترل‌ها</th><th>متن</th></tr>
-  </thead>
-  <tbody>`;
+        let html = `<table class="table table-striped table-bordered align-middle" style="table-layout:fixed;">
+                <colgroup><col style="width:5%"><col style="width:10%"><col style="width:85%"></colgroup>
+                <thead class="table-dark"><tr><th>ردیف</th><th>کنترل‌ها</th><th>متن</th></tr></thead><tbody>`;
 
         for (let i = 1; i < json.slice(1).length; i += 2) {
           const idx = Math.floor((i - 1) / 2);
-
           let combined = "";
           for (let j = i; j < i + 2 && j < json.slice(1).length; j++) {
             if (json[j].length > 0)
               combined += `<span>${json[j].join(" ")}</span><br>`;
           }
 
-          html += `
-    <tr>
-      <td class="row-number">${idx + 1}</td>
-      <td class="controls-cell">
-        <button class="btn btn-primary btn-fixed mb-1" onclick="toggleAudio(${idx},this)">▶ پخش</button>
-        <button class="btn btn-secondary btn-fixed mb-1" onclick="toggleText(${idx})">نمایش/مخفی</button>
+          // پیدا کردن فولدر مطابق شماره ردیف
+          const folder = audioFolders.find(
+            (f) => parseInt(f.split("-")[0]) === idx + 1
+          );
+          const folderPath = folder ? `/Files/Audio/${folder}` : null;
+          const rowNum = String(idx + 1).padStart(3, "0");
 
-        <button class="btn btn-danger btn-fixed mb-1" onclick="startRecording(${idx})">🎙 ضبط</button>
-        <button class="btn btn-warning btn-fixed mb-1" onclick="stopRecording(${idx})">■ توقف</button>
-        <span id="rec_${idx}" class="recording-indicator"></span>
-
-        <audio id="myAudio_${idx}" controls class="w-100 mt-1" style="display:none"></audio>
-      </td>
-      <td class="dialog-cell" id="dialog_${idx}" style="display:none">${combined}</td>
-    </tr>`;
+          html += `<tr>
+                    <td class="row-number">${idx + 1}</td>
+                    <td class="controls-cell">
+                        <button class="btn btn-primary btn-fixed mb-1" onclick="toggleAudio(${idx},this)">▶ پخش</button>
+                        <button class="btn btn-secondary btn-fixed mb-1" onclick="toggleText(${idx})">نمایش/مخفی</button>
+                        <button class="btn btn-danger btn-fixed mb-1" onclick="startRecording(${idx})">🎙 ضبط</button>
+                        <button class="btn btn-warning btn-fixed mb-1" onclick="stopRecording(${idx})">■ توقف</button>
+                        <span id="rec_${idx}" class="recording-indicator"></span>
+                        <audio id="myAudio_${idx}" controls class="w-100 mt-1" style="display:none"
+                               ${
+                                 folderPath
+                                   ? `src="${folderPath}/${rowNum}-01.mp3"`
+                                   : ""
+                               }></audio>
+                    </td>
+                    <td class="dialog-cell" id="dialog_${idx}" style="display:none">${combined}</td>
+                </tr>`;
         }
 
         html += "</tbody></table>";
         tableContainer.innerHTML = html;
       }
 
-      /* --------------- Toggle audio playback ------------------ */
       function toggleAudio(index, btn) {
-        if (currentAudio && !currentAudio.paused) {
-          currentAudio.pause();
-          if (currentBtn) currentBtn.textContent = "▶ پخش";
-          if (currentAudio.datasetIndex == index) {
-            currentAudio = null;
-            currentBtn = null;
-            return;
-          }
+        const audioEl = document.getElementById(`myAudio_${index}`);
+        if (!audioEl.src) {
+          showToast("فایل صوتی پیدا نشد");
+          return;
         }
-
-        currentAudio = new Audio(`audio${index + 1}.mp3`);
-        currentAudio.datasetIndex = index;
-        currentBtn = btn;
-        btn.textContent = "⏹ توقف";
-        currentAudio.play();
-
-        currentAudio.onended = () => {
+        if (!audioEl.paused) {
+          audioEl.pause();
           btn.textContent = "▶ پخش";
-          currentAudio = null;
-          currentBtn = null;
+          return;
+        }
+        audioEl.play();
+        btn.textContent = "⏹ توقف";
+        audioEl.onended = () => {
+          btn.textContent = "▶ پخش";
         };
       }
 
-      /* --------------- Toggle text ------------------ */
       function toggleText(index) {
         const el = document.getElementById(`dialog_${index}`);
         el.style.display = el.style.display === "none" ? "block" : "none";
       }
 
-      /* --------------- Recording audio ------------------ */
       async function startRecording(index) {
         try {
           mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -322,10 +277,8 @@
           });
           mediaRecorder = new MediaRecorder(mediaStream);
           recordedChunks = [];
-
           mediaRecorder.ondataavailable = (e) => recordedChunks.push(e.data);
           mediaRecorder.onstop = () => saveRecording(index);
-
           mediaRecorder.start();
           document.getElementById(`rec_${index}`).style.display =
             "inline-block";
@@ -353,7 +306,6 @@
         showToast("فایل صوتی ذخیره شد");
       }
 
-      /* --------------- Sidebar toggle ------------------ */
       function toggleSidebar() {
         sidebar.classList.toggle("collapsed");
       }
