@@ -1,368 +1,198 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>نمایش گفتگوهای NATI</title>
-    <link rel="stylesheet" href="Files/bootstrap.rtl.min.css" />
-    <style>
-      body {
-        background: #f6f6fb;
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: row;
-        overflow: hidden;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نمایش گفتگوهای NATI</title>
 
-      #main {
-        flex: 1;
-        padding: 16px;
-        overflow-y: auto;
-        direction: rtl;
-      }
-      #toggleSidebar {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 1100;
-        background: #007bff;
-        color: #fff;
-        border: none;
-        padding: 6px 10px;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-      .sheet-item {
-        padding: 10px;
-        margin: 6px 0;
-        border-radius: 6px;
-        cursor: pointer;
-        border: 1px solid #e0e0ef;
-        background: #fafafa;
-      }
-      .sheet-item:hover {
-        background: #eef;
-      }
-      .sheet-item.active {
-        background: #dde5ff;
-        border-color: #b9c6ff;
-      }
-      td.row-number {
-        width: 5%;
-        min-width: 70px;
-        text-align: center;
-        vertical-align: middle;
-      }
-      td.controls-cell {
-        width: 10%;
-        min-width: 120px;
-      }
-      td.dialog-cell {
-        width: 85%;
-        text-align: center;
-        word-wrap: break-word;
-      }
-      .btn-fixed {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        font-size: 18px;
-        text-align: center;
-      }
-      .recording-indicator {
-        width: 10px;
-        height: 10px;
-        background: red;
-        border-radius: 50%;
-        margin-left: 6px;
-        animation: blink 1s infinite;
-        display: none;
-      }
-      @keyframes blink {
-        0%,
-        50%,
-        100% {
-          opacity: 1;
-        }
-        25%,
-        75% {
-          opacity: 0;
-        }
-      }
-      #toast {
-        position: fixed;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 2000;
-        min-width: 200px;
-      }
+  <!-- مسیرهای درست برای GitHub -->
+  <link rel="stylesheet" href="Files/bootstrap.rtl.min.css" />
 
-      /* #sidebar.collapsed {
-        transform: translateX(100%);
+  <style>
+    body {
+      background: #f6f6fb;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+    #main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      direction: rtl;
+    }
+    #sidebar {
+      width: 260px;
+      background: #fff;
+      padding: 12px;
+      border-left: 1px solid #ddd;
+      overflow-y: auto;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    #sidebar.collapsed {
+      width: 0;
+    }
+    .sheet-item {
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #e0e0ef;
+      background: #fafafa;
+    }
+    .sheet-item.active {
+      background: #dde5ff;
+      border-color: #b9c6ff;
+    }
+    .btn-fixed {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 18px;
+      text-align: center;
+    }
+    .recording-indicator {
+      width: 10px;
+      height: 10px;
+      background: red;
+      border-radius: 50%;
+      margin-left: 6px;
+      animation: blink 1s infinite;
+      display: none;
+    }
+    @keyframes blink {
+      0%,50%,100% { opacity: 1; }
+      25%,75% { opacity: 0; }
+    }
+  </style>
+</head>
 
-        left: 0;
-      } */
+<body>
 
-      #sidebar {
-        width: 260px;
-        background: #fff;
-        padding: 12px;
-        border-left: 1px solid #ddd;
-        overflow-y: auto;
-        box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-      }
-      #sidebar.collapsed {
-        width: 00px;
-        transition: width 0.4s ease;
-        /* transform: translateX(100%); */
-      }
+<div id="sidebar">
+  <h3>گفتگوها</h3>
+  <div id="sheetList">در حال بارگذاری…</div>
+</div>
 
-      /* Responsive */
-      @media (max-width: 768px) {
-        body {
-          flex-direction: column;
-        }
-        #sidebar {
-          position: fixed;
-          top: 0;
-          left: 250px;
-          height: 100%;
-          width: 80%;
-          max-width: 260px;
-          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-          transform: translateX(-100%);
-          z-index: 1050;
-        }
-        #sidebar.collapsed {
-          /* transform: translateX(-100%); */
-          transition: width 0.4s ease;
-          left: 0;
-        }
-        #main {
-          padding: 10px;
-          margin-left: 0;
-        }
-        #toggleSidebar {
-          left: 10px;
-          right: auto;
-        }
-        table {
-          width: 100%;
-          font-size: 14px;
-        }
-        td.controls-cell,
-        td.row-number {
-          white-space: nowrap;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="sidebar">
-      <h3>گفتگوها</h3>
-      <div id="sheetList">در حال بارگذاری…</div>
-    </div>
+<div id="main">
+  <h2 id="sheetTitle">گفتگو</h2>
+  <div id="tableContainer">— هیچ شیتی انتخاب نشده —</div>
+</div>
 
-    <div id="main">
-      <h2 id="sheetTitle">گفتگو</h2>
-      <div id="tableContainer">— هیچ شیتی انتخاب نشده —</div>
-    </div>
+<button id="toggleSidebar" onclick="toggleSidebar()" style="position:fixed;top:10px;right:10px;z-index:1000;" class="btn btn-primary">☰</button>
 
-    <button id="toggleSidebar" onclick="toggleSidebar()">☰</button>
-    <div id="toast" class="toast text-white bg-dark border-0"></div>
+<script src="Files/xlsx.full.min.js"></script>
+<script src="Files/bootstrap.bundle.min.js"></script>
 
-    <script src="Files/xlsx.full.min.js"></script>
-    <script src="Files/bootstrap.bundle.min.js"></script>
-    <script>
-      let workbook = null,
-        currentAudio = null,
-        currentBtn = null,
-        mediaRecorder = null,
-        recordedChunks = [],
-        mediaStream = null;
-      const sheetList = document.getElementById("sheetList");
-      const tableContainer = document.getElementById("tableContainer");
-      const sheetTitle = document.getElementById("sheetTitle");
-      const toastEl = document.getElementById("toast");
-      const bsToast = new bootstrap.Toast(toastEl);
-      function showToast(msg) {
-        toastEl.textContent = msg;
-        bsToast.show();
-      }
+<script>
+let workbook = null,
+    currentAudio = null,
+    currentBtn = null;
 
-      async function loadDefaultExcel() {
-        try {
-          const response = await fetch("Conversations.xlsx");
-          const arrayBuffer = await response.arrayBuffer();
-          workbook = XLSX.read(arrayBuffer, { type: "array" });
-          renderSheetList();
-          const first = workbook.SheetNames[0];
-          const el = sheetList.querySelector(".sheet-item");
-          selectSheet(first, el);
-        } catch (err) {
-          sheetList.textContent = "فایل پیدا نشد";
-        }
-      }
+const sheetList = document.getElementById("sheetList");
+const tableContainer = document.getElementById("tableContainer");
+const sheetTitle = document.getElementById("sheetTitle");
 
-      function renderSheetList() {
-        sheetList.innerHTML = "";
-        workbook.SheetNames.forEach((name, idx) => {
-          const div = document.createElement("div");
-          div.className = "sheet-item";
-          div.textContent = name;
-          div.dataset.folderNumber = idx + 1;
-          div.onclick = () => selectSheet(name, div);
-          sheetList.appendChild(div);
-        });
-      }
+window.onload = loadDefaultExcel;
 
-      function selectSheet(name, element) {
-        [...document.querySelectorAll(".sheet-item")].forEach((el) =>
-          el.classList.remove("active")
-        );
-        element.classList.add("active");
-        sheetTitle.textContent = `گفتگو: ${name}`;
-        const folderNumber = element.dataset.folderNumber;
-        loadSheet(name, folderNumber);
-      }
+async function loadDefaultExcel() {
+  try {
+    const response = await fetch("Conversations.xlsx");
+    const arrayBuffer = await response.arrayBuffer();
+    workbook = XLSX.read(arrayBuffer, { type: "array" });
+    renderSheetList();
 
-      function loadSheet(name, folderNumber) {
-        const ws = workbook.Sheets[name];
-        const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        const folderName = encodeURIComponent(name.trim());
-        let html = `<table class="table table-striped table-bordered table-responsive" style="table-layout:fixed;">
-  <colgroup><col style="width:5%; min-width:60px;"><col style="width:12%; "><col style=""></colgroup>
-  <thead class="table-dark"><tr><th>ردیف</th><th>کنترل‌ها</th><th>متن</th></tr></thead><tbody>`;
-        const rows = json.slice(1);
-        for (let i = 0; i < rows.length; i++) {
-          const row = rows[i];
-          if (!row || row.length === 0) continue;
-          let combined = "";
-          for (let j = 0; j < row.length; j++) combined += `${row[j]} `;
-          const displayRowNumber = i + 1;
-          const rowNum = String(folderNumber).padStart(3, "0");
-          const sentenceNum = String(displayRowNumber).padStart(2, "0");
-          html += `<tr>
-    <td class="row-number">${displayRowNumber}</td>
-    <td class="controls-cell">
-      <button class="btn btn-primary btn-fixed mb-1" onclick="toggleAudioWithFallback(${folderNumber},'${folderName}','${rowNum}','${sentenceNum}',this)">▶</button>
-      <button class="btn btn-secondary btn-fixed mb-1" onclick="toggleText(${i})">📝</button>
-      <button class="btn btn-danger btn-fixed mb-1" onclick="startRecording(${i})">🎙</button>
-      <button class="btn btn-warning btn-fixed mb-1" onclick="stopRecording(${i})">■</button>
-      <span id="rec_${i}" class="recording-indicator"></span>
-      <audio id="myAudio_${i}" controls class="w-100 mt-1" style="display:none"></audio>
-    </td>
-    <td class="dialog-cell" id="dialog_${i}" style="display:none">${combined}</td>
-    </tr>`;
-        }
-        html += "</tbody></table>";
-        tableContainer.innerHTML = html;
-      }
+    const first = workbook.SheetNames[0];
+    const el = sheetList.querySelector(".sheet-item");
+    selectSheet(first, el);
 
-      async function getAudioPath(
-        folderNumber,
-        folderName,
-        rowNum,
-        sentenceNum
-      ) {
-        const dashPath = `Files/Audio/${folderNumber}-${folderName}/${rowNum}-${sentenceNum}.mp3`;
-        const underscorePath = `Files/Audio/${folderNumber}-${folderName}/${rowNum}_${sentenceNum}.mp3`;
-        try {
-          const res = await fetch(dashPath, { method: "HEAD" });
-          if (res.ok) return dashPath;
-          else return underscorePath;
-        } catch (e) {
-          return underscorePath;
-        }
-      }
+  } catch (err) {
+    sheetList.textContent = "فایل پیدا نشد";
+  }
+}
 
-      async function toggleAudioWithFallback(
-        folderNumber,
-        folderName,
-        rowNum,
-        sentenceNum,
-        btn
-      ) {
-        if (currentAudio && !currentAudio.paused) {
-          if (currentBtn === btn) {
-            currentAudio.pause();
-            currentBtn.textContent = "▶";
-            currentAudio = null;
-            currentBtn = null;
-            return;
-          }
-          currentAudio.pause();
-          if (currentBtn) currentBtn.textContent = "▶";
-          currentAudio = null;
-          currentBtn = null;
-        }
-        const audioSrc = await getAudioPath(
-          folderNumber,
-          folderName,
-          rowNum,
-          sentenceNum
-        );
-        currentAudio = new Audio(audioSrc);
-        currentBtn = btn;
-        btn.textContent = "⏹";
-        currentAudio.play();
-        currentAudio.onended = () => {
-          btn.textContent = "▶";
-          currentAudio = null;
-          currentBtn = null;
-        };
-      }
+function renderSheetList() {
+  sheetList.innerHTML = "";
+  workbook.SheetNames.forEach((name, idx) => {
+    const div = document.createElement("div");
+    div.className = "sheet-item";
+    div.textContent = name;
+    div.dataset.folderNumber = idx + 1;
+    div.onclick = () => selectSheet(name, div);
+    sheetList.appendChild(div);
+  });
+}
 
-      function toggleText(index) {
-        const el = document.getElementById(`dialog_${index}`);
-        el.style.display = el.style.display === "none" ? "block" : "none";
-      }
+function selectSheet(name, el) {
+  document.querySelectorAll(".sheet-item").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+  sheetTitle.textContent = `گفتگو: ${name}`;
 
-      async function startRecording(index) {
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          mediaRecorder = new MediaRecorder(mediaStream);
-          recordedChunks = [];
-          mediaRecorder.ondataavailable = (e) => recordedChunks.push(e.data);
-          mediaRecorder.onstop = () => saveRecording(index);
-          mediaRecorder.start();
-          document.getElementById(`rec_${index}`).style.display =
-            "inline-block";
-          showToast("در حال ضبط...");
-        } catch (err) {
-          showToast("خطا در دسترسی میکروفون");
-        }
-      }
+  loadSheet(name, el.dataset.folderNumber);
+}
 
-      function stopRecording(index) {
-        if (mediaRecorder) {
-          mediaRecorder.stop();
-          mediaStream.getTracks().forEach((t) => t.stop());
-          document.getElementById(`rec_${index}`).style.display = "none";
-          showToast("ضبط متوقف شد");
-        }
-      }
+function loadSheet(name, folderNumber) {
+  const ws = workbook.Sheets[name];
+  const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-      function saveRecording(index) {
-        const blob = new Blob(recordedChunks, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
-        const audioEl = document.getElementById(`myAudio_${index}`);
-        audioEl.src = url;
-        audioEl.style.display = "block";
-        showToast("فایل صوتی ذخیره شد");
-      }
+  let html = `
+    <table class="table table-striped table-bordered">
+    <thead class="table-dark"><tr>
+      <th>ردیف</th>
+      <th>کنترل‌ها</th>
+      <th>متن</th>
+    </tr></thead>
+    <tbody>`;
 
-      function toggleSidebar() {
-        document.getElementById("sidebar").classList.toggle("collapsed");
-      }
+  const rows = json.slice(1);
+  let dialogIndex = 0;
 
-      window.onload = loadDefaultExcel;
-    </script>
-  </body>
-</html>
+  for (let i = 0; i < rows.length; i++) {
+
+    if (!rows[i] || rows[i].join("").trim() === "") continue;
+
+    const textEn = rows[i] ? rows[i].join(" ").trim() : "";
+    const textFa = rows[i + 1] ? rows[i + 1].join(" ").trim() : "";
+
+    const displayNum = dialogIndex + 1;
+    const rowNum = String(folderNumber).padStart(3, "0");
+    const sentenceNum = String(displayNum).padStart(2, "0");
+
+    html += `
+      <tr>
+        <td>${displayNum}</td>
+        <td>
+          <button class="btn btn-primary btn-fixed"
+                  onclick="toggleAudioWithFallback(${folderNumber}, '${name}', '${rowNum}', '${sentenceNum}', this)">▶</button>
+
+          <button class="btn btn-secondary btn-fixed" onclick="toggleText(${dialogIndex})">📝</button>
+        </td>
+
+        <td id="dialog_${dialogIndex}" style="display:none">
+          <div class="fw-bold">${textEn}</div>
+          <div class="mt-1 text-muted">${textFa}</div>
+        </td>
+      </tr>
+    `;
+
+    dialogIndex++;
+    i++; // پرش از EN → FA
+  }
+
+  html += "</tbody></table>";
+  tableContainer.innerHTML = html;
+}
+
+function toggleText(i) {
+  const el = document.getElementById(`dialog_${i}`);
+  el.style.display = (el.style.display === "none") ? "block" : "none";
+}
+
+async function getAudioPath(folderNumber, folderName, rowNum, sentenceNum) {
+  folderName = encodeURIComponent(folderName.trim());
+
+  const dash = `Files/Audio/${folderNumber}-${folderName}/${rowNum}-${
