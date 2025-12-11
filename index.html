@@ -2,11 +2,10 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <title>NAATI Practice – Copper Made</title>
+    <title>NAATI Practice – Copper</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- IONICONS CDN -->
+    <!-- Ionicons -->
     <script
       type="module"
       src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
@@ -16,11 +15,12 @@
       src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
     ></script>
 
-    <!-- CSS -->
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
+    <!-- Dark mode toggle -->
     <button
       class="toggle-dark"
       onclick="document.body.classList.toggle('dark')"
@@ -29,23 +29,34 @@
     </button>
 
     <div id="app">
+      <!-- Sidebar -->
       <aside id="sidebar">
-        <h3 style="margin-bottom: 12px">گفتگوها</h3>
-        <div id="sheetList">در حال بارگذاری…</div>
+        <h3>گفتگوها</h3>
+        <div id="sheetList">در حال بارگذاری...</div>
       </aside>
 
+      <!-- Sidebar toggle button -->
       <button id="toggleSidebar">☰</button>
 
+      <!-- Main -->
       <main id="main">
-        <h2 id="sheetTitle">☰</h2>
+        <h2 id="sheetTitle">—</h2>
+
+        <!-- Intro button container -->
+        <div id="introContainer" class="intro-wrapper" style="display: none">
+          <button id="introButton" class="intro-btn" onclick="toggleIntro()">
+            <ion-icon name="play"></ion-icon>
+            <span>پخش مقدمه گفتگو</span>
+          </button>
+        </div>
+
         <div id="tableContainer"></div>
       </main>
     </div>
 
-    <!-- XLSX Library -->
+    <!-- XLSX -->
     <script src="Files/xlsx.full.min.js"></script>
-
-    <!-- JS -->
+    <!-- App script -->
     <script src="script.js"></script>
   </body>
 </html>
