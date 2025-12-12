@@ -18,16 +18,22 @@
     <!-- Styles -->
     <link rel="stylesheet" href="style.css" />
   </head>
-
+  <!-- Apple-style Toast -->
+  <div id="toast">
+    <span id="toastBody"></span>
+  </div>
   <body>
     <!-- Dark mode toggle -->
-    <button
-      class="toggle-dark"
-      onclick="document.body.classList.toggle('dark')"
-    >
-      🌓
-    </button>
-
+    <div class="top-controls">
+      <button id="darkToggle" title="Dark mode">🌓</button>
+      <button
+        id="toggleVocab"
+        onclick="toggleVocabPanel()"
+        title="لغات انتخابی"
+      >
+        📒
+      </button>
+    </div>
     <div id="app">
       <!-- Sidebar -->
       <aside id="sidebar">
@@ -43,7 +49,7 @@
         <h2 id="sheetTitle">—</h2>
 
         <!-- Intro button container -->
-        <div id="introContainer" class="intro-wrapper" style="display: none">
+        <div id="introContainer" class="intro-wrapper">
           <button id="introButton" class="intro-btn" onclick="toggleIntro()">
             <ion-icon name="play"></ion-icon>
             <span>پخش مقدمه گفتگو</span>
@@ -52,6 +58,19 @@
 
         <div id="tableContainer"></div>
       </main>
+    </div>
+    <div id="vocabPanel" class="vocab-modal">
+      <h2 class="vocab-title">لغات انتخابی</h2>
+
+      <textarea
+        id="vocabList"
+        placeholder="لغات انتخاب‌شده اینجا نمایش داده می‌شوند…"
+      ></textarea>
+
+      <div class="vocab-actions">
+        <button onclick="copyVocab()" class="vocab-btn copy">کپی</button>
+        <button onclick="clearVocab()" class="vocab-btn clear">پاک</button>
+      </div>
     </div>
 
     <!-- XLSX -->

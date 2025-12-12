@@ -1,154 +1,178 @@
+/* =====================================================
+   ROOT VARIABLES (Apple Music–like)
+===================================================== */
 :root {
   --accent: #007aff;
+
   --bg-top: #e5f0ff;
   --bg-bottom: #c9d6ff;
-  --glass-bg: rgba(255, 255, 255, 0.2);
-  --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
-  --sidebar-bg: rgba(255, 255, 255, 0.22);
-  --sidebar-border: rgba(255, 255, 255, 0.6);
-  --text-main: #121826;
+
   --bg-dark-top: #05070d;
   --bg-dark-bottom: #050814;
-  --glass-dark-bg: rgba(15, 23, 42, 0.7);
-  --glass-dark-border: rgba(148, 163, 184, 0.45);
-  --sidebar-dark-bg: rgba(15, 23, 42, 0.85);
-  --sidebar-dark-border: rgba(148, 163, 184, 0.6);
+
+  --text-main: #121826;
   --text-dark-main: #e5e7eb;
+
+  --glass-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
 }
 
-/* GLOBAL */
+/* =====================================================
+   GLOBAL
+===================================================== */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text-main);
+
   background: radial-gradient(
       circle at 12% 20%,
-      rgba(255, 255, 255, 0.9) 0,
+      rgba(255, 255, 255, 0.9),
       transparent 55%
     ),
-    radial-gradient(
-      circle at 80% 0%,
-      rgba(199, 210, 254, 0.9) 0,
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 0% 95%,
-      rgba(209, 250, 229, 0.8) 0,
-      transparent 55%
-    ),
+    radial-gradient(circle at 80% 0%, rgba(199, 210, 254, 0.9), transparent 55%),
+    radial-gradient(circle at 0% 95%, rgba(209, 250, 229, 0.8), transparent 55%),
     linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+
   transition: background 0.3s ease, color 0.3s ease;
 }
 
 body.dark {
   background: radial-gradient(
       circle at 10% 0,
-      rgba(30, 64, 175, 0.35) 0,
+      rgba(30, 64, 175, 0.35),
       transparent 55%
     ),
     radial-gradient(
       circle at 90% 95%,
-      rgba(56, 189, 248, 0.25) 0,
+      rgba(56, 189, 248, 0.25),
       transparent 55%
     ),
     linear-gradient(180deg, var(--bg-dark-top), var(--bg-dark-bottom));
+
   color: var(--text-dark-main);
 }
 
-/* DARK TOGGLE */
-.toggle-dark {
+/* =====================================================
+   DARK MODE TOGGLE
+===================================================== */
+/* .toggle-dark {
   position: fixed;
   top: 12px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  background: var(--accent);
-  color: #fff;
+
   width: 44px;
   height: 44px;
-  font-size: 22px;
   border-radius: 50%;
   border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-}
 
-/* SIDEBAR */
+  background: var(--accent);
+  color: #fff;
+  font-size: 22px;
+
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+} */
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
 #sidebar {
   position: fixed;
   top: 0;
   left: 0;
   width: 260px;
   height: 100vh;
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
+
+  background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  border-right: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 14px 0 30px rgba(0, 0, 0, 0.25);
+
   padding: 18px 14px;
+  z-index: 3000;
+
   transform: translateX(-100%);
   transition: transform 0.35s ease, width 0.35s ease, opacity 0.35s ease;
-  z-index: 3000;
+}
+
+body.dark #sidebar {
+  background: rgba(15, 23, 42, 0.85);
+  border-right: 1px solid rgba(148, 163, 184, 0.6);
 }
 
 #sidebar.visible {
   transform: translateX(0);
 }
+
 #sidebar.collapsed {
-  width: 0 !important;
-  padding: 0 !important;
+  width: 0;
+  padding: 0;
   opacity: 0;
-  overflow: hidden !important;
-  border: none !important;
+  overflow: hidden;
+  border: none;
 }
 
+/* Sidebar items */
 .sheet-item {
   padding: 10px 12px;
   margin-bottom: 8px;
+
   background: rgba(255, 255, 255, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 14px;
+
   display: flex;
   justify-content: space-between;
   cursor: pointer;
   transition: 0.25s;
 }
+
 .sheet-item.active {
   background: rgba(255, 255, 255, 0.95);
   border-color: var(--accent);
-  font-weight: bold;
+  font-weight: 600;
 }
 
-/* TOGGLE SIDEBAR BUTTON */
+/* =====================================================
+   SIDEBAR TOGGLE BUTTON
+===================================================== */
 #toggleSidebar {
   position: fixed;
   top: 16px;
   left: 16px;
   z-index: 9999;
+
   width: 42px;
   height: 42px;
-  background: rgba(0, 0, 0, 0.85);
-  color: white;
   border-radius: 50%;
   border: none;
+
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
   font-size: 22px;
+
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* MAIN */
+/* =====================================================
+   MAIN
+===================================================== */
 #main {
   padding: 90px 16px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 #tableContainer {
   width: 100%;
   display: flex;
@@ -156,18 +180,30 @@ body.dark {
   align-items: center;
 }
 
-/* CARD */
+/* =====================================================
+   DIALOG CARD
+===================================================== */
 .dialog-card {
   width: 100%;
   max-width: 1100px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 18px;
   padding: 14px;
   margin-bottom: 16px;
+
   box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(26px);
 }
+
+body.dark .dialog-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+
 .dialog-header {
   display: flex;
   justify-content: space-between;
@@ -175,13 +211,16 @@ body.dark {
   margin-bottom: 10px;
 }
 
-/* BUTTONS */
+/* =====================================================
+   BUTTONS
+===================================================== */
 .btn-circle {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   border: none;
   font-size: 22px;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,32 +248,36 @@ body.dark {
   color: #fff;
 }
 
-/* RED RECORD DOT */
+/* =====================================================
+   RECORD DOT
+===================================================== */
 .rec-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  margin-right: 6px;
   background: #ef4444;
+  margin-right: 6px;
+
   box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   animation: recPulse 1s infinite;
   display: none;
 }
+
 @keyframes recPulse {
   0% {
-    transform: scale(1);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
   70% {
-    transform: scale(1.6);
     box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
   }
   100% {
-    transform: scale(1);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
   }
 }
 
+/* =====================================================
+   TEXT BOXES
+===================================================== */
 .dialog-body {
   display: none;
 }
@@ -244,6 +287,7 @@ body.dark {
   border-radius: 10px;
   margin-top: 6px;
 }
+
 .lang-box.en {
   background: #eef6ff;
   direction: ltr;
@@ -252,7 +296,9 @@ body.dark {
   background: #fff1f1;
 }
 
-/* DESKTOP */
+/* =====================================================
+   DESKTOP LAYOUT
+===================================================== */
 @media (min-width: 992px) {
   #sidebar {
     transform: none;
@@ -262,7 +308,294 @@ body.dark {
     width: calc(100% - 260px);
   }
   #sidebar.collapsed + #main {
-    margin-left: 0 !important;
-    width: 100% !important;
+    margin-left: 0;
+    width: 100%;
   }
+}
+
+/* =====================================================
+   CLOUDY BLUE GLASS VOCAB PANEL (FINAL)
+===================================================== */
+/* =====================================================
+   CENTERED VOCAB MODAL – Apple Music Style
+===================================================== */
+.vocab-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: min(90vw, 520px);
+  max-height: 70vh;
+
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(220, 235, 255, 0.9),
+    rgba(195, 220, 255, 0.78)
+  );
+
+  backdrop-filter: blur(34px) saturate(160%);
+  -webkit-backdrop-filter: blur(34px) saturate(160%);
+
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+
+  padding: 22px;
+
+  box-shadow: 0 35px 70px rgba(0, 60, 150, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  z-index: 5000;
+}
+
+/* Title */
+.vocab-title {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1c1e;
+}
+
+/* Textarea */
+.vocab-modal textarea {
+  width: 93%;
+  min-height: 220px;
+  max-height: 40vh;
+
+  resize: none;
+  border: none;
+  border-radius: 18px;
+
+  padding: 14px 16px;
+
+  background: rgba(255, 255, 255, 0.65);
+  color: #1c1c1e;
+
+  font-size: 15px;
+  line-height: 1.7;
+
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.vocab-modal textarea:focus {
+  outline: none;
+}
+
+/* Buttons container */
+.vocab-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* Buttons */
+.vocab-btn {
+  min-width: 110px;
+  padding: 10px 22px;
+
+  border-radius: 999px;
+  border: none;
+
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.vocab-btn:active {
+  transform: scale(0.94);
+}
+
+/* Copy */
+.vocab-btn.copy {
+  background: linear-gradient(180deg, #34d399, #22c55e);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+}
+
+/* Clear */
+.vocab-btn.clear {
+  background: linear-gradient(180deg, #f87171, #ef4444);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+}
+
+/* =========================
+   Dark Mode
+========================= */
+body.dark .vocab-modal {
+  background: linear-gradient(
+    180deg,
+    rgba(45, 85, 145, 0.8),
+    rgba(30, 60, 115, 0.75)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+body.dark .vocab-title {
+  color: #f5f5f7;
+}
+
+body.dark .vocab-modal textarea {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+/* =====================================================
+   APPLE MUSIC BOTTOM TOAST (FINAL)
+===================================================== */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+
+  min-width: 220px;
+  max-width: 85vw;
+
+  background: rgba(30, 30, 30, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 14px;
+
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 4000;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+body:not(.dark) #toast {
+  background: rgba(255, 255, 255, 0.85);
+  color: #111;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+/* =====================================================
+   TOP CONTROLS (Dark + Vocab) — Apple Style
+===================================================== */
+.top-controls {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  display: flex;
+  gap: 12px;
+}
+
+/* Shared style */
+.top-controls button {
+  width: 44px;
+  height: 44px;
+
+  border-radius: 50%;
+  border: none;
+
+  font-size: 20px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.top-controls button:active {
+  transform: scale(0.92);
+}
+
+/* Dark mode button accent */
+.toggle-dark {
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  color: #fff;
+}
+
+/* Vocab button — same family, calmer */
+#toggleVocab {
+  background: rgba(255, 255, 255, 0.75);
+  color: #1c1c1e;
+}
+
+/* Dark theme */
+body.dark .top-controls button {
+  background: rgba(30, 41, 59, 0.85);
+  color: #f5f5f7;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+body.dark .toggle-dark {
+  background: linear-gradient(180deg, #60a5fa, #3b82f6);
+}
+
+/* =====================================================
+   INTRO BUTTON – Apple Music Style
+===================================================== */
+.intro-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 24px;
+}
+
+.intro-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: none;
+
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  color: #fff;
+
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.intro-btn ion-icon {
+  font-size: 20px;
+}
+
+.intro-btn:active {
+  transform: scale(0.95);
+}
+
+.intro-btn.playing {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
 }
