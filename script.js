@@ -75,7 +75,7 @@ function loadSheet(name, folderIndex) {
   let html = "";
   let idx = 1;
 
-  for (let i = 1; i < rows.length; i += 2) {
+  for (let i = 1; i < rows.length - 2; i += 2) {
     const speaker = rows[i]?.[0] || "";
     const en = rows[i]?.[1] || "";
     const fa = rows[i + 1]?.[1] || "";
