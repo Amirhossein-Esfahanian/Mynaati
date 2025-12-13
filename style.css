@@ -137,6 +137,12 @@ body.dark #sidebar {
   font-weight: 600;
 }
 
+body.dark .sheet-item.active {
+  background: rgba(19, 130, 194, 0.95);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
 /* =====================================================
    SIDEBAR TOGGLE BUTTON
 ===================================================== */
@@ -294,6 +300,14 @@ body.dark .dialog-card {
 }
 .lang-box.fa {
   background: #fff1f1;
+}
+
+body.dark .lang-box.en {
+  background: #3c6697;
+  direction: ltr;
+}
+body.dark .lang-box.fa {
+  background: #171e44;
 }
 
 /* =====================================================

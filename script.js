@@ -148,11 +148,26 @@ function togglePlay(folder, name, row, sen, btn) {
       currentBtn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
   }
 
-  const src = `Files/Audio/${folder}-${name}/${row}-${sen}.mp3`;
-  currentAudio = new Audio(src);
+  const srcDash = `Files/Audio/${folder}-${name}/${row}-${sen}.mp3`;
+  const srcUnderscore = `Files/Audio/${folder}-${name}/${row}_${sen}.mp3`;
+
+  currentAudio = new Audio(srcDash);
   currentBtn = btn;
 
   btn.innerHTML = `<ion-icon name="stop"></ion-icon>`;
+
+  // اگر با - لود نشد، با _ امتحان کن
+  currentAudio.onerror = () => {
+    currentAudio = new Audio(srcUnderscore);
+    console.log("-error");
+    currentAudio.onended = () => {
+      btn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+      currentAudio = null;
+      currentBtn = null;
+    };
+
+    currentAudio.play();
+  };
 
   currentAudio.onended = () => {
     btn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
