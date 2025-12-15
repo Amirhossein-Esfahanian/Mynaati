@@ -35,7 +35,7 @@ window.onload = async () => {
   workbook.SheetNames.forEach((name, i) => {
     const div = document.createElement("div");
     div.className = "sheet-item";
-    div.innerHTML = `<span>${name}</span><ion-icon name="chevron-forward-outline"></ion-icon>`;
+    div.innerHTML = `<ion-icon name="chevron-back-outline"></ion-icon><span>${name}</span>`;
     div.onclick = () => selectSheet(name, i + 1, div);
     list.appendChild(div);
   });
@@ -372,4 +372,14 @@ darkBtn.addEventListener("click", () => {
     localStorage.setItem("darkMode", "off");
     showToast("لایت مود فعال شد ☀️");
   }
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "sheetSearch") return;
+
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll(".sheet-item").forEach((item) => {
+    const text = item.innerText.toLowerCase();
+    item.style.display = text.includes(q) ? "flex" : "none";
+  });
 });
