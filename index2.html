@@ -1,167 +1,321 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple Glass – Final</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Apple Glass (Light + Noise + Edge)</title>
 
 <style>
-/* ================= ROOT ================= */
+/* ================== BASE / BG ================== */
 :root{
-  --glass-tint: rgba(255,255,255,0.35);
-  --glass-bottom: rgba(255,255,255,0.18);
-  --border: rgba(255,255,255,0.35);
-}
+  --text: #0b1220;
 
-/* ================= BACKGROUND ================= */
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
-  color:#111;
+  /* Apple-like glass tuning (Light) */
+  --glass-tint: rgba(18, 22, 28, 0.28);      /* دودی خیلی ملایم (مثل ویدئو) */
+  --glass-tint-2: rgba(18, 22, 28, 0.18);
+  --glass-border: rgba(255,255,255,0.22);
 
-  background:
-    linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),
-    url("https://images.unsplash.com/photo-1519681393784-d120267933ba");
-  background-size:cover;
-  background-position:center;
-  background-attachment:fixed;
+  --specular-top: rgba(255,255,255,0.50);   /* نور بالای شیشه */
+  --specular-mid: rgba(255,255,255,0.10);
+  --inner-shadow: rgba(0,0,0,0.30);
+  --drop-shadow: rgba(0,0,0,0.38);
 
-  transition:.4s;
+  --blur: 36px;
+  --sat: 185%;
+  --con: 118%;
 }
 
 body.dark{
-  color:#eee;
-  background:
-    linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.45)),
-    url("https://images.unsplash.com/photo-1519681393784-d120267933ba");
+  --text: #e7eefc;
+
+  /* Apple-like glass tuning (Dark) */
+  --glass-tint: rgba(18, 18, 18, 0.58);
+  --glass-tint-2: rgba(10, 10, 10, 0.42);
+  --glass-border: rgba(255,255,255,0.10);
+
+  --specular-top: rgba(255,255,255,0.22);
+  --specular-mid: rgba(255,255,255,0.08);
+  --inner-shadow: rgba(0,0,0,0.55);
+  --drop-shadow: rgba(0,0,0,0.55);
+
+  --blur: 34px;
+  --sat: 165%;
+  --con: 115%;
 }
 
-/* ================= CONTENT ================= */
-main{
-  padding:40px;
-  max-width:900px;
-  margin:auto;
-}
-.spacer{height:1400px}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  color:var(--text);
 
-/* ================= APPLE GLASS ================= */
-.apple-glass{
+  /* پس‌زمینه برای تست شیشه */
   background-image:
-    linear-gradient(180deg,var(--glass-tint),var(--glass-bottom)),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.70), transparent 55%),
+    radial-gradient(circle at 85% 10%, rgba(219,234,254,0.65), transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(224,242,254,0.55), transparent 55%),
+    url("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=60");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 
-  backdrop-filter: blur(36px) saturate(180%) contrast(110%);
-  -webkit-backdrop-filter: blur(36px) saturate(180%) contrast(110%);
-
-  border:1px solid var(--border);
-
-  box-shadow:
-    0 30px 70px rgba(0,0,0,.35),
-    inset 0 1px 0 rgba(255,255,255,.45),
-    inset 0 -1px 0 rgba(255,255,255,.12);
+  transition: background .35s ease, color .35s ease;
 }
 
-body.dark .apple-glass{
-  --glass-tint: rgba(40,40,40,.75);
-  --glass-bottom: rgba(20,20,20,.55);
-  --border: rgba(255,255,255,.12);
+main{
+  padding:26px;
+  margin-right: 280px;
+  max-width: 980px;
+}
+@media(max-width:768px){
+  main{ margin-right: 0; padding-bottom: 130px; }
 }
 
-/* ================= DOCK ================= */
-#dock{
+.h1{
+  font-size: 26px;
+  margin: 8px 0 6px;
+  letter-spacing: -0.2px;
+}
+.p{
+  opacity:.92;
+  margin:0 0 12px;
+}
+.spacer{ height: 1200px; }
+
+/* ================== DESKTOP SIDEBAR (SOURCE LIST) ================== */
+.sidebar{
   position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:14px;
-  padding:14px 20px;
-  border-radius:32px;
-  z-index:1000;
+  top:0; right:0;
+  width: 280px;
+  height: 100%;
+  padding: 16px 14px;
+  overflow:auto;
+}
+@media(max-width:768px){ .sidebar{display:none} }
+
+.sidebar h3{
+  margin: 8px 10px 10px;
+  font-size: 16px;
+}
+#desktopChatList{
+  list-style:none;
+  margin:0;
+  padding:0 6px 14px;
+}
+#desktopChatList li{
+  padding: 12px 12px;
+  margin: 8px 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.26);
+}
+body.dark #desktopChatList li{
+  background: rgba(255,255,255,0.08);
+}
+
+/* ================== APPLE GLASS CORE ==================
+   نکته: شیشه اپل = blur + tint + specular + inner shadow + edge + noise
+======================================================== */
+.apple-glass{
+  position: relative;
+  overflow: hidden;
+
+  background:
+    linear-gradient(180deg, var(--glass-tint), var(--glass-tint-2));
+
+  backdrop-filter: blur(var(--blur)) saturate(var(--sat)) contrast(var(--con));
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat)) contrast(var(--con));
+
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 30px 70px var(--drop-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(255,255,255,0.06);
+}
+
+/* Specular highlight (نور بالایی) */
+.apple-glass::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  pointer-events:none;
+
+  background:
+    radial-gradient(120% 85% at 50% 0%,
+      var(--specular-top) 0%,
+      var(--specular-mid) 40%,
+      transparent 70%),
+    linear-gradient(180deg,
+      rgba(255,255,255,0.12),
+      transparent 55%);
+
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+
+/* Inner shadow + depth (عمق داخل شیشه) */
+.apple-glass::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+
+  background:
+    radial-gradient(120% 120% at 50% 120%,
+      rgba(0,0,0,0.22) 0%,
+      transparent 55%),
+    linear-gradient(180deg,
+      transparent 0%,
+      rgba(0,0,0,0.16) 100%);
+
+  opacity: 0.9;
+  mix-blend-mode: multiply;
+}
+
+/* Noise overlay (فرق اصلی با شیشه وبی) */
+.noise{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.9;
+}
+
+/* ================== DOCK (MOBILE) ================== */
+#dock{
+  display:none;
+}
+@media(max-width:768px){
+  #dock{
+    position:fixed;
+    bottom:16px;
+    left:50%;
+    transform: translateX(-50%);
+    display:flex;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 30px;
+    z-index: 1000;
+  }
 }
 
 .dock-btn{
-  width:52px;
-  height:52px;
-  border-radius:50%;
-  border:none;
-  background:rgba(255,255,255,.28);
-  font-size:22px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
   cursor:pointer;
-  transition:
-    transform .2s cubic-bezier(.22,1.4,.36,1),
-    background .3s;
-}
+  font-size: 22px;
 
-body.dark .dock-btn{background:rgba(255,255,255,.12)}
+  background: rgba(255,255,255,0.22);
+  box-shadow:
+    0 10px 18px rgba(0,0,0,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform .18s cubic-bezier(.22,1.4,.36,1), background .25s ease;
+}
+body.dark .dock-btn{
+  background: rgba(255,255,255,0.10);
+}
+.dock-btn:active{ transform: scale(0.92); }
 
-/* ================= SHEET ================= */
-#sheet{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:78vh;
-  border-radius:28px 28px 0 0;
-  transform:translateY(100%);
-  transition:transform .45s cubic-bezier(.22,1.4,.36,1);
-  z-index:950;
-  display:flex;
-  flex-direction:column;
-}
-#sheet.open{transform:translateY(0)}
-
-.sheet-handle{
-  width:48px;height:6px;
-  border-radius:4px;
-  background:rgba(255,255,255,.65);
-  margin:12px auto 6px;
-}
-.sheet-content{
-  padding:20px;
-  overflow:auto;
-  flex:1;
-}
-.sheet-content li{
-  list-style:none;
-  padding:14px;
-  margin-bottom:8px;
-  border-radius:16px;
-  background:rgba(255,255,255,.22);
-}
-body.dark .sheet-content li{background:rgba(255,255,255,.08)}
-
-/* ================= BACKDROP ================= */
+/* ================== BACKDROP ================== */
 #backdrop{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.35);
+  background: rgba(0,0,0,0.32);
   opacity:0;
   pointer-events:none;
-  transition:.3s;
-  z-index:900;
+  transition: opacity .25s ease;
+  z-index: 900;
 }
 #backdrop.show{
   opacity:1;
   pointer-events:auto;
 }
 
-/* ================= MOBILE ONLY ================= */
-@media(min-width:769px){#dock{display:none}}
+/* ================== iOS BOTTOM SHEET ================== */
+#sheet{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  height: 78vh;
+  border-radius: 28px 28px 0 0;
+  transform: translateY(100%);
+  transition: transform .45s cubic-bezier(.22,1.35,.36,1);
+  z-index: 950;
+
+  display:flex;
+  flex-direction: column;
+}
+#sheet.open{ transform: translateY(0); }
+
+.sheet-handle{
+  width: 46px;
+  height: 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.62);
+  margin: 12px auto 6px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.sheet-title{
+  text-align:center;
+  font-size: 16px;
+  padding: 6px 12px 10px;
+  opacity: 0.95;
+  letter-spacing: -0.2px;
+}
+.sheet-content{
+  padding: 10px 16px 18px;
+  overflow:auto;
+  flex: 1;
+}
+.sheet-content ul{ list-style:none; padding:0; margin:0; }
+.sheet-content li{
+  padding: 14px 14px;
+  margin: 9px 0;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.20);
+  box-shadow:
+    0 10px 18px rgba(0,0,0,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.22);
+}
+body.dark .sheet-content li{
+  background: rgba(255,255,255,0.08);
+}
+
+/* Dock magnification (فقط برای حس بهتر؛ نور/شیشه رو خراب نمی‌کنه) */
+@media(max-width:768px){
+  #dock:hover .dock-btn{ will-change: transform; }
+}
 </style>
 </head>
 
 <body>
 
+<!-- DESKTOP SIDEBAR (منبع لیست گفتگوها) -->
+<aside class="sidebar apple-glass">
+  <div class="noise"></div>
+  <h3>گفتگوها</h3>
+  <ul id="desktopChatList">
+    <li>Conversation 001 — Intro</li>
+    <li>Conversation 002 — At the bank</li>
+    <li>Conversation 003 — Doctor appointment</li>
+    <li>Conversation 004 — Renting a house</li>
+    <li>Conversation 005 — Work interview</li>
+    <li>Conversation 006 — Phone call</li>
+  </ul>
+</aside>
+
 <main>
-  <h1>Apple-grade Glass UI</h1>
-  <p>Dock magnification + elastic + adaptive glass</p>
+  <div class="h1">Apple-like Glass (شیشه + نور)</div>
+  <p class="p">Dock و Sheet باید دقیقاً حس شیشه‌ی اپل رو بده: نور بالا، لبه براق، عمق، نویز.</p>
+  <p class="p">برای تست: روی موبایل/DevTools موبایل، Dock پایین میاد. 💬 رو بزن.</p>
   <div class="spacer"></div>
 </main>
 
-<!-- DOCK -->
+<!-- DOCK (MOBILE) -->
 <div id="dock" class="apple-glass">
-  <button class="dock-btn">🏠</button>
+  <div class="noise"></div>
+  <button class="dock-btn" id="dockHome">🏠</button>
   <button class="dock-btn" id="openSheet">💬</button>
   <button class="dock-btn" id="toggleDark">🌙</button>
 </div>
@@ -171,92 +325,81 @@ body.dark .sheet-content li{background:rgba(255,255,255,.08)}
 
 <!-- SHEET -->
 <div id="sheet" class="apple-glass">
+  <div class="noise"></div>
   <div class="sheet-handle"></div>
+  <div class="sheet-title">گفتگوها</div>
   <div class="sheet-content">
-    <ul>
-      <li>Conversation 001</li>
-      <li>Conversation 002</li>
-      <li>Conversation 003</li>
-      <li>Conversation 004</li>
-      <li>Conversation 005</li>
-    </ul>
+    <ul id="mobileChatList"></ul>
   </div>
 </div>
 
 <script>
-/* ================= SHEET ================= */
-const sheet=document.getElementById("sheet");
-const backdrop=document.getElementById("backdrop");
-document.getElementById("openSheet").onclick=()=>{
+/* ============ CLONE LIST: Sidebar -> Sheet ============ */
+const desktopList = document.getElementById("desktopChatList");
+const mobileList  = document.getElementById("mobileChatList");
+mobileList.innerHTML = desktopList.innerHTML;
+
+/* ============ SHEET OPEN/CLOSE ============ */
+const sheet = document.getElementById("sheet");
+const backdrop = document.getElementById("backdrop");
+
+document.getElementById("openSheet").onclick = () => {
   sheet.classList.add("open");
   backdrop.classList.add("show");
 };
-backdrop.onclick=closeSheet;
+
 function closeSheet(){
   sheet.classList.remove("open");
   backdrop.classList.remove("show");
+  sheet.style.transform = "";
 }
+backdrop.onclick = closeSheet;
 
-/* ================= SWIPE ELASTIC ================= */
-let startY=0,drag=false;
-sheet.addEventListener("touchstart",e=>{
-  startY=e.touches[0].clientY;
-  drag=true;
-});
-sheet.addEventListener("touchmove",e=>{
-  if(!drag)return;
-  let diff=e.touches[0].clientY-startY;
-  if(diff>0) sheet.style.transform=`translateY(${diff*0.6}px)`;
-});
-sheet.addEventListener("touchend",e=>{
-  drag=false;
-  let diff=e.changedTouches[0].clientY-startY;
-  if(diff>120) closeSheet();
-  else sheet.style.transform="";
-});
+/* ============ iOS-LIKE SWIPE DOWN (elastic) ============ */
+let startY = 0;
+let dragging = false;
 
-/* ================= DOCK MAGNIFICATION ================= */
-const buttons=[...document.querySelectorAll(".dock-btn")];
-document.getElementById("dock").addEventListener("mousemove",e=>{
-  buttons.forEach(btn=>{
-    const r=btn.getBoundingClientRect();
-    const d=Math.abs(e.clientX-(r.left+r.width/2));
-    const scale=Math.max(1,1.4-d/120);
-    btn.style.transform=`scale(${scale}) translateY(${-(scale-1)*12}px)`;
-  });
-});
-document.getElementById("dock").addEventListener("mouseleave",()=>{
-  buttons.forEach(b=>b.style.transform="");
-});
+sheet.addEventListener("touchstart", (e) => {
+  startY = e.touches[0].clientY;
+  dragging = true;
+}, {passive:true});
 
-/* ================= DARK MODE ================= */
-document.getElementById("toggleDark").onclick=()=>{
+sheet.addEventListener("touchmove", (e) => {
+  if(!dragging) return;
+  const diff = e.touches[0].clientY - startY;
+  if(diff > 0){
+    // rubber-band: حرکت کمتر از انگشت
+    sheet.style.transform = `translateY(${diff * 0.62}px)`;
+  }
+}, {passive:true});
+
+sheet.addEventListener("touchend", (e) => {
+  dragging = false;
+  const endY = e.changedTouches[0].clientY;
+  const diff = endY - startY;
+
+  if(diff > 120) closeSheet();
+  else sheet.style.transform = "";
+}, {passive:true});
+
+/* ============ DARK MODE (coherent) ============ */
+document.getElementById("toggleDark").onclick = () => {
   document.body.classList.toggle("dark");
 };
 
-/* ================= ENVIRONMENT TINT ================= */
-(function(){
-  const img=new Image();
-  img.crossOrigin="anonymous";
-  img.src="https://images.unsplash.com/photo-1519681393784-d120267933ba";
-  img.onload=()=>{
-    const c=document.createElement("canvas");
-    const x=c.getContext("2d");
-    c.width=c.height=50;
-    x.drawImage(img,0,0,50,50);
-    const d=x.getImageData(0,0,50,50).data;
-    let r=0,g=0,b=0;
-    for(let i=0;i<d.length;i+=4){
-      r+=d[i]; g+=d[i+1]; b+=d[i+2];
-    }
-    r=Math.round(r/(d.length/4));
-    g=Math.round(g/(d.length/4));
-    b=Math.round(b/(d.length/4));
-    document.documentElement.style.setProperty(
-      "--glass-tint",`rgba(${r},${g},${b},0.35)`
-    );
-  };
-})();
+/* ============ (Optional) Dock magnification on pointer (desktop emulation) ============ */
+const dock = document.getElementById("dock");
+const btns = [...dock.querySelectorAll(".dock-btn")];
+dock.addEventListener("mousemove", (e) => {
+  btns.forEach(b => {
+    const r = b.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const d = Math.abs(e.clientX - cx);
+    const s = Math.max(1, 1.32 - d/140);
+    b.style.transform = `scale(${s}) translateY(${-(s-1)*10}px)`;
+  });
+});
+dock.addEventListener("mouseleave", () => btns.forEach(b => b.style.transform=""));
 </script>
 
 </body>
