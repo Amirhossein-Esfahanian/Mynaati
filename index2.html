@@ -155,6 +155,35 @@ main{
   border-radius:14px;
   background:rgba(255,255,255,.22);
 }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* 👇 تصویر پس‌زمینه */
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,0.15),
+      rgba(255,255,255,0.15)
+    ),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee");
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+
+body.dark {
+  background-image:
+    linear-gradient(
+      rgba(0,0,0,0.45),
+      rgba(0,0,0,0.45)
+    ),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee");
+}
 </style>
 </head>
 
