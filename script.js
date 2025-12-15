@@ -345,11 +345,13 @@ function playRecorded(index) {
 /* =========================
    Sidebar Toggle
 ========================= */
-document.getElementById("toggleSidebar").onclick = () => {
-  const sb = document.getElementById("sidebar");
-  if (window.innerWidth < 992) sb.classList.toggle("visible");
-  else sb.classList.toggle("collapsed");
-};
+const sidebar = document.getElementById("sidebar");
+const toggleBtn = document.getElementById("toggleSidebar");
+
+toggleBtn.addEventListener("click", () => {
+  const isCollapsed = sidebar.classList.contains("collapsed");
+  sidebar.classList.toggle("collapsed", !isCollapsed);
+});
 
 /* =========================
    Dark Mode Toggle (FIX)
