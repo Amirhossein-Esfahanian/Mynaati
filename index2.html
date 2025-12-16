@@ -1,173 +1,150 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Liquid Glass Page</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>True Liquid Glass</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background:
+    radial-gradient(circle at 20% 10%, #e0f2fe, transparent 55%),
+    radial-gradient(circle at 80% 30%, #f5d0fe, transparent 55%),
+    linear-gradient(180deg, #f8fafc, #e5e7eb);
+}
 
-  <style>
-    :root {
-      --glass-bg: rgba(255,255,255,0.15);
-      --glass-border: rgba(255,255,255,0.35);
-      --text-main: #0f172a;
-    }
+main {
+  max-width: 800px;
+  margin: 120px auto 300px;
+  padding: 24px;
+  line-height: 1.9;
+}
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --glass-bg: rgba(20,20,30,0.35);
-        --glass-border: rgba(255,255,255,0.15);
-        --text-main: #e5e7eb;
-      }
-    }
+img {
+  width: 100%;
+  border-radius: 20px;
+  margin: 40px 0;
+}
 
-    * {
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
+/* ===== TRUE LIQUID GLASS ===== */
+.glass {
+  backdrop-filter:
+    url(#liquid)
+    blur(18px)
+    saturate(1.2)
+    contrast(1.05);
+  -webkit-backdrop-filter:
+    url(#liquid)
+    blur(18px)
+    saturate(1.2)
+    contrast(1.05);
 
-    body {
-      margin: 0;
-      min-height: 200vh;
-      color: var(--text-main);
-      background:
-        radial-gradient(circle at 20% 10%, #dbeafe, transparent 50%),
-        radial-gradient(circle at 80% 30%, #f0abfc, transparent 55%),
-        linear-gradient(180deg, #f8fafc, #e5e7eb);
-    }
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+}
 
-    /* ===== Liquid Glass ===== */
-    .glass {
-      backdrop-filter: url(#liquid) blur(14px);
-      -webkit-backdrop-filter: url(#liquid) blur(14px);
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-    }
+/* ===== TOP BUTTONS ===== */
+.topbar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  z-index: 10;
+}
 
-    /* ===== Header Buttons ===== */
-    header {
-      position: sticky;
-      top: 16px;
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      padding: 12px;
-    }
+.btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+}
 
-    .btn {
-      padding: 12px 22px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: transform .25s ease;
-    }
+/* ===== DOCK ===== */
+.dock {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 28px;
+  z-index: 10;
+}
 
-    .btn:hover {
-      transform: scale(1.08);
-    }
+.icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  border-radius: 16px;
+  transition: transform .25s ease;
+}
 
-    /* ===== Content ===== */
-    main {
-      max-width: 900px;
-      margin: 80px auto 160px;
-      padding: 24px;
-    }
-
-    .content {
-      border-radius: 28px;
-      padding: 32px;
-    }
-
-    .content img {
-      width: 100%;
-      border-radius: 20px;
-      margin: 24px 0;
-    }
-
-    .content p {
-      line-height: 1.9;
-      font-size: 1.05rem;
-    }
-
-    /* ===== Dock ===== */
-    .dock {
-      position: fixed;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 14px;
-      padding: 14px 20px;
-      border-radius: 28px;
-      z-index: 20;
-    }
-
-    .dock-item {
-      width: 54px;
-      height: 54px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      font-size: 26px;
-      cursor: pointer;
-      transition: transform .25s ease;
-    }
-
-    .dock-item:hover {
-      transform: scale(1.35) translateY(-8px);
-    }
-  </style>
+.icon:hover {
+  transform: scale(1.35) translateY(-6px);
+}
+</style>
 </head>
 
 <body>
 
-<!-- ===== SVG FILTER (Liquid Displacement) ===== -->
+<!-- SVG FILTER (SAME IDEA AS jh3y) -->
 <svg width="0" height="0">
   <filter id="liquid">
-    <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" seed="2" result="noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="28"/>
-    <feGaussianBlur stdDeviation="0.6"/>
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="0.012"
+      numOctaves="3"
+      seed="8"
+      result="noise" />
+    <feDisplacementMap
+      in="SourceGraphic"
+      in2="noise"
+      scale="35"
+      xChannelSelector="R"
+      yChannelSelector="G" />
   </filter>
 </svg>
 
-<header>
-  <div class="btn glass">دکمه اول</div>
-  <div class="btn glass">دکمه دوم</div>
-  <div class="btn glass">دکمه سوم</div>
-</header>
+<div class="topbar glass">
+  <div class="btn">کلید ۱</div>
+  <div class="btn">کلید ۲</div>
+  <div class="btn">کلید ۳</div>
+</div>
 
 <main>
-  <div class="content glass">
-    <h1>افکت Liquid Glass</h1>
+  <h1>Liquid Glass واقعی</h1>
 
-    <p>
-      این یک متن طولانی برای تست اسکرول است. این افکت دقیقاً مشابه پروژه jh3y
-      با SVG displacement ساخته شده و فقط روی لایه شیشه‌ای اعمال می‌شود.
-    </p>
+  <p>
+    این نسخه از افکت دقیقاً با همان منطق CodePen jh3y ساخته شده:
+    distortion واقعی، بدون کارت و بدون شادو.
+  </p>
 
-    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" alt="sample">
+  <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
 
-    <p>
-      هر چه بیشتر اسکرول کنید، متوجه می‌شوید که افکت شیشه ثابت است
-      ولی محتوای پشت آن حرکت می‌کند، درست مثل iOS / visionOS.
-    </p>
+  <p>
+    اسکرول کن. داک ثابت است ولی محتوای زیر آن حرکت می‌کند،
+    دقیقاً مثل iOS و visionOS.
+  </p>
 
-    <p>
-      این ساختار پایه‌ای است که می‌توانی روی آن چت، لیست، کارت، پنل تنظیمات
-      یا هر چیز دیگری بسازی.
-    </p>
-  </div>
+  <p>
+    این همان illusion اصلی است.
+  </p>
 </main>
 
-<!-- ===== Dock Bar ===== -->
 <div class="dock glass">
-  <div class="dock-item">🏠</div>
-  <div class="dock-item">🔍</div>
-  <div class="dock-item">💬</div>
-  <div class="dock-item">⚙️</div>
+  <div class="icon">🏠</div>
+  <div class="icon">🔍</div>
+  <div class="icon">💬</div>
+  <div class="icon">⚙️</div>
 </div>
 
 </body>
