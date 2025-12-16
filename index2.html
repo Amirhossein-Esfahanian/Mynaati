@@ -1,373 +1,108 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Liquid Glass (No Drag)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Liquid Glass Page</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg-url: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1800&q=60");
-      --glass-radius: 28px;
-      --glass-blur: 10px;        /* blur داخل شیشه (روی snapshot) */
-      --backdrop-blur: 18px;     /* blur واقعی پشت شیشه (اگر پشتیبانی بشه) */
-      --sat: 170%;
-      --con: 115%;
-      --tint: rgba(255,255,255,0.10); /* tint روی شیشه */
-      --border: rgba(255,255,255,0.22);
-      --shadow: rgba(0,0,0,0.30);
-
-      /* شدت refraction (displacement) */
-      --disp: 22; /* px */
-      --noise-opacity: 0.045;
-      --highlight: rgba(255,255,255,0.45);
+    :root {
+      --glass-bg: rgba(255,255,255,0.15);
+      --glass-border: rgba(255,255,255,0.35);
+      --text-main: #0f172a;
     }
 
-    body.dark{
-      --tint: rgba(0,0,0,0.22);
-      --border: rgba(255,255,255,0.12);
-      --shadow: rgba(0,0,0,0.55);
-      --highlight: rgba(255,255,255,0.22);
-      --sat: 155%;
-      --con: 112%;
-      --disp: 18;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --glass-bg: rgba(20,20,30,0.35);
+        --glass-border: rgba(255,255,255,0.15);
+        --text-main: #e5e7eb;
+      }
     }
 
-    *{ box-sizing: border-box; }
-    body{
-      margin:0;
-      font-family: -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
-      color:#0b1220;
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
 
-      background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.65), transparent 55%),
-        radial-gradient(circle at 85% 10%, rgba(219,234,254,0.55), transparent 55%),
-        radial-gradient(circle at 10% 90%, rgba(224,242,254,0.45), transparent 55%),
-        var(--bg-url);
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+    body {
+      margin: 0;
       min-height: 200vh;
-      transition: color .25s ease;
-    }
-    body.dark{ color:#e7eefc; }
-
-    main{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 28px 18px 160px;
-    }
-    h1{ margin: 10px 0 6px; font-size: 26px; letter-spacing: -0.2px; }
-    p{ margin: 0 0 12px; opacity: .9; line-height: 1.6; }
-
-    /* ===========================
-       LIQUID GLASS CORE
-       =========================== */
-    .liquid-glass{
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--glass-radius);
-      border: 1px solid var(--border);
-
-      box-shadow:
-        0 28px 70px var(--shadow),
-        inset 0 1px 0 rgba(255,255,255,0.20),
-        inset 0 -1px 0 rgba(255,255,255,0.06);
-
-      /* blur واقعی پشت شیشه (اگه ساپورت شود) */
-      backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--sat)) contrast(var(--con));
-      -webkit-backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--sat)) contrast(var(--con));
-    }
-
-    /* این لایه “اسنپ‌شات” پس‌زمینه‌ست که با JS هم‌تراز میشه */
-    .liquid-glass .glass-sample{
-      position:absolute;
-      inset:-40px; /* کمی بزرگ‌تر برای جلوگیری از لبه‌های خالی هنگام displacement */
-      background-image:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.65), transparent 55%),
-        radial-gradient(circle at 85% 10%, rgba(219,234,254,0.55), transparent 55%),
-        radial-gradient(circle at 10% 90%, rgba(224,242,254,0.45), transparent 55%),
-        var(--bg-url);
-      background-size: cover;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-
-      /* لنزی کردن با SVG filter */
-      filter: url(#liquidGlass);
-
-      /* یک blur داخلی برای نرم شدن شکست نور */
-      transform: translateZ(0);
-      will-change: background-position, filter, transform;
-    }
-
-    /* tint + highlight اپلی */
-    .liquid-glass::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
+      color: var(--text-main);
       background:
-        radial-gradient(120% 85% at 50% 0%,
-          var(--highlight) 0%,
-          rgba(255,255,255,0.10) 40%,
-          transparent 70%),
-        linear-gradient(180deg, rgba(255,255,255,0.10), transparent 55%),
-        linear-gradient(180deg, var(--tint), rgba(255,255,255,0.02));
-      mix-blend-mode: screen;
-      opacity: .9;
+        radial-gradient(circle at 20% 10%, #dbeafe, transparent 50%),
+        radial-gradient(circle at 80% 30%, #f0abfc, transparent 55%),
+        linear-gradient(180deg, #f8fafc, #e5e7eb);
     }
 
-    /* نویز خیلی ریز (تفاوت اصلی شیشه اپلی با وبی) */
-    .liquid-glass::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      opacity: var(--noise-opacity);
-      mix-blend-mode: overlay;
+    /* ===== Liquid Glass ===== */
+    .glass {
+      backdrop-filter: url(#liquid) blur(14px);
+      -webkit-backdrop-filter: url(#liquid) blur(14px);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
     }
 
-    /* محتوا روی شیشه */
-    .glass-content{
-      position: relative;
-      z-index: 1;
+    /* ===== Header Buttons ===== */
+    header {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
     }
 
-    /* ===========================
-       iOS Dock + Sheet demo
-       =========================== */
-    #dock{
+    .btn {
+      padding: 12px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: transform .25s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.08);
+    }
+
+    /* ===== Content ===== */
+    main {
+      max-width: 900px;
+      margin: 80px auto 160px;
+      padding: 24px;
+    }
+
+    .content {
+      border-radius: 28px;
+      padding: 32px;
+    }
+
+    .content img {
+      width: 100%;
+      border-radius: 20px;
+      margin: 24px 0;
+    }
+
+    .content p {
+      line-height: 1.9;
+      font-size: 1.05rem;
+    }
+
+    /* ===== Dock ===== */
+    .dock {
       position: fixed;
-      bottom: 16px;
+      bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 14px;
-      padding: 14px 18px;
-      z-index: 1000;
-    }
-    .dock-btn{
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      font-size: 22px;
-      background: rgba(255,255,255,0.16);
-      box-shadow: 0 12px 22px rgba(0,0,0,0.16);
-      transition: transform .18s cubic-bezier(.22,1.4,.36,1);
-    }
-    body.dark .dock-btn{ background: rgba(255,255,255,0.10); }
-    .dock-btn:active{ transform: scale(0.92); }
-
-    #backdrop{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.34);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s ease;
-      z-index: 900;
-    }
-    #backdrop.show{
-      opacity: 1;
-      pointer-events: auto;
+      padding: 14px 20px;
+      border-radius: 28px;
+      z-index: 20;
     }
 
-    #sheet{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 78vh;
-      border-radius: 28px 28px 0 0;
-      transform: translateY(100%);
-      transition: transform .45s cubic-bezier(.22,1.35,.36,1);
-      z-index: 950;
-      display:flex;
-      flex-direction: column;
-    }
-    #sheet.open{ transform: translateY(0); }
-
-    .sheet-handle{
-      width: 46px;
-      height: 6px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.60);
-      margin: 12px auto 8px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
-    }
-    .sheet-title{
-      text-align: center;
-      font-size: 16px;
-      opacity: .95;
-      padding-bottom: 8px;
-    }
-    .sheet-list{
-      list-style:none;
-      padding: 0 16px 18px;
-      margin: 0;
-      overflow:auto;
-      flex: 1;
-    }
-    .sheet-list li{
-      padding: 14px 14px;
-      margin: 9px 0;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.14);
-      box-shadow: 0 10px 18px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.18);
-    }
-    body.dark .sheet-list li{ background: rgba(255,255,255,0.08); }
-  </style>
-</head>
-
-<body>
-
-  <!-- SVG filter: Liquid glass refraction via turbulence + displacement -->
-  <svg width="0" height="0" style="position:absolute">
-    <filter id="liquidGlass" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <!-- نقشه شکست نور -->
-      <feTurbulence type="fractalNoise" baseFrequency="0.010 0.020" numOctaves="2" seed="8" result="noise"/>
-      <!-- کمی نرم کردن نقشه -->
-      <feGaussianBlur in="noise" stdDeviation="1.2" result="noiseBlur"/>
-      <!-- جابه‌جایی پیکسلی (refraction) -->
-      <feDisplacementMap in="SourceGraphic" in2="noiseBlur" scale="22" xChannelSelector="R" yChannelSelector="G" result="disp"/>
-      <!-- شارپ/کنتراست ملایم برای حس لنز -->
-      <feColorMatrix in="disp" type="matrix"
-        values="
-          1.08 0    0    0 0
-          0    1.08 0    0 0
-          0    0    1.08 0 0
-          0    0    0    1 0" result="boost"/>
-      <feGaussianBlur in="boost" stdDeviation="0.6" result="soft"/>
-      <feBlend in="boost" in2="soft" mode="screen"/>
-    </filter>
-  </svg>
-
-  <main>
-    <h1>Liquid Glass (بدون Drag)</h1>
-    <p>این نسخه “refraction/displacement” رو با SVG filter شبیه همون CodePen پیاده می‌کنه. 💬 رو بزن تا Sheet باز شه.</p>
-    <p>برای تست دقیق شیشه: اسکرول کن و ببین الگوهای پس‌زمینه داخل شیشه “لنزی” می‌شن.</p>
-  </main>
-
-  <!-- Dock -->
-  <div id="dock" class="liquid-glass" data-glass>
-    <div class="glass-sample" aria-hidden="true"></div>
-    <div class="glass-content">
-      <button class="dock-btn" id="homeBtn">🏠</button>
-      <button class="dock-btn" id="openSheet">💬</button>
-      <button class="dock-btn" id="toggleDark">🌙</button>
-    </div>
-  </div>
-
-  <div id="backdrop"></div>
-
-  <!-- Bottom sheet -->
-  <div id="sheet" class="liquid-glass" data-glass>
-    <div class="glass-sample" aria-hidden="true"></div>
-    <div class="glass-content">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">گفتگوها</div>
-      <ul class="sheet-list">
-        <li>Conversation 001 — Intro</li>
-        <li>Conversation 002 — At the bank</li>
-        <li>Conversation 003 — Doctor appointment</li>
-        <li>Conversation 004 — Renting a house</li>
-        <li>Conversation 005 — Work interview</li>
-        <li>Conversation 006 — Phone call</li>
-      </ul>
-    </div>
-  </div>
-
-  <script>
-    // 1) آپدیت شدت displacement با CSS var
-    function syncFilterScale(){
-      const scale = getComputedStyle(document.documentElement).getPropertyValue('--disp').trim() || '22';
-      const disp = document.querySelector('#liquidGlass feDisplacementMap');
-      if (disp) disp.setAttribute('scale', scale);
-    }
-
-    // 2) هم‌تراز کردن background داخل شیشه با پس‌زمینه صفحه
-    //    (بدون drag؛ فقط scroll/resize)
-    const glassEls = [...document.querySelectorAll('[data-glass]')];
-
-    function updateGlassSampling(){
-      for (const el of glassEls){
-        const sample = el.querySelector('.glass-sample');
-        if (!sample) continue;
-
-        // چون background-attachment: fixed است، لازم نیست position خیلی پیچیده شود،
-        // اما برای consistency (بخصوص برخی مرورگرها) ما هم‌ترازی را نگه می‌داریم:
-        const r = el.getBoundingClientRect();
-        // مقدارهای منفی باعث می‌شود طرح پس‌زمینه داخل شیشه، دقیقاً پشتش align شود
-        sample.style.backgroundPosition = `${-r.left}px ${-r.top}px`;
-      }
-    }
-
-    let raf = 0;
-    function requestUpdate(){
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        syncFilterScale();
-        updateGlassSampling();
-      });
-    }
-
-    window.addEventListener('scroll', requestUpdate, {passive:true});
-    window.addEventListener('resize', requestUpdate);
-    window.addEventListener('orientationchange', requestUpdate);
-
-    // init
-    requestUpdate();
-
-    // 3) Sheet open/close + iOS swipe down (elastic)
-    const sheet = document.getElementById('sheet');
-    const backdrop = document.getElementById('backdrop');
-
-    document.getElementById('openSheet').onclick = () => {
-      sheet.classList.add('open');
-      backdrop.classList.add('show');
-      requestUpdate();
-    };
-
-    function closeSheet(){
-      sheet.classList.remove('open');
-      backdrop.classList.remove('show');
-      sheet.style.transform = '';
-      requestUpdate();
-    }
-    backdrop.onclick = closeSheet;
-
-    let startY = 0, dragging = false;
-    sheet.addEventListener('touchstart', (e) => {
-      startY = e.touches[0].clientY;
-      dragging = true;
-    }, {passive:true});
-
-    sheet.addEventListener('touchmove', (e) => {
-      if (!dragging) return;
-      const diff = e.touches[0].clientY - startY;
-      if (diff > 0){
-        sheet.style.transform = `translateY(${diff * 0.62}px)`;
-      }
-    }, {passive:true});
-
-    sheet.addEventListener('touchend', (e) => {
-      dragging = false;
-      const diff = e.changedTouches[0].clientY - startY;
-      if (diff > 120) closeSheet();
-      else sheet.style.transform = '';
-    }, {passive:true});
-
-    // 4) Dark mode
-    document.getElementById('toggleDark').onclick = () => {
-      document.body.classList.toggle('dark');
-      syncFilterScale();
-      requestUpdate();
-    };
-  </script>
-</body>
-</html>
+    .dock
