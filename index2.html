@@ -105,4 +105,70 @@
       z-index: 20;
     }
 
-    .dock
+    .dock-item {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      cursor: pointer;
+      transition: transform .25s ease;
+    }
+
+    .dock-item:hover {
+      transform: scale(1.35) translateY(-8px);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===== SVG FILTER (Liquid Displacement) ===== -->
+<svg width="0" height="0">
+  <filter id="liquid">
+    <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" seed="2" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="28"/>
+    <feGaussianBlur stdDeviation="0.6"/>
+  </filter>
+</svg>
+
+<header>
+  <div class="btn glass">دکمه اول</div>
+  <div class="btn glass">دکمه دوم</div>
+  <div class="btn glass">دکمه سوم</div>
+</header>
+
+<main>
+  <div class="content glass">
+    <h1>افکت Liquid Glass</h1>
+
+    <p>
+      این یک متن طولانی برای تست اسکرول است. این افکت دقیقاً مشابه پروژه jh3y
+      با SVG displacement ساخته شده و فقط روی لایه شیشه‌ای اعمال می‌شود.
+    </p>
+
+    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" alt="sample">
+
+    <p>
+      هر چه بیشتر اسکرول کنید، متوجه می‌شوید که افکت شیشه ثابت است
+      ولی محتوای پشت آن حرکت می‌کند، درست مثل iOS / visionOS.
+    </p>
+
+    <p>
+      این ساختار پایه‌ای است که می‌توانی روی آن چت، لیست، کارت، پنل تنظیمات
+      یا هر چیز دیگری بسازی.
+    </p>
+  </div>
+</main>
+
+<!-- ===== Dock Bar ===== -->
+<div class="dock glass">
+  <div class="dock-item">🏠</div>
+  <div class="dock-item">🔍</div>
+  <div class="dock-item">💬</div>
+  <div class="dock-item">⚙️</div>
+</div>
+
+</body>
+</html>
