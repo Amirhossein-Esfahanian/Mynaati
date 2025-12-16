@@ -1,190 +1,112 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Liquid Glass – Enhanced</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Liquid Lens Dock</title>
 
 <style>
 html, body {
   margin: 0;
   font-family: system-ui, -apple-system;
   background:
-    radial-gradient(circle at 15% 10%, #e0f2fe, transparent 55%),
-    radial-gradient(circle at 85% 30%, #f5d0fe, transparent 55%),
-    linear-gradient(180deg, #f8fafc, #e5e7eb);
+    radial-gradient(circle at 50% 20%, #1f2933, #000);
+  color: white;
+  height: 200vh;
 }
 
 main {
-  max-width: 820px;
-  margin: 140px auto 300px;
+  max-width: 900px;
+  margin: 160px auto;
   padding: 24px;
-  line-height: 1.9;
+  line-height: 2;
 }
 
-img {
-  width: 100%;
-  border-radius: 18px;
-  margin: 40px 0;
-}
-
-/* === TRUE LIQUID GLASS === */
-.glass {
-  position: relative;
-  backdrop-filter:
-    url(#liquid)
-    blur(18px)
-    saturate(1.15)
-    contrast(1.05);
-  -webkit-backdrop-filter:
-    url(#liquid)
-    blur(18px)
-    saturate(1.15)
-    contrast(1.05);
-
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.25);
-}
-
-/* subtle light reflection */
-.glass::after {
-  content: "";
-  position: absolute;
+.grid {
+  position: fixed;
   inset: 0;
   background:
-    linear-gradient(
-      120deg,
-      transparent 30%,
-      rgba(255,255,255,0.35),
-      transparent 70%
-    );
-  opacity: 0.15;
+    linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size: 80px 80px;
   pointer-events: none;
 }
 
-/* === TOP BAR === */
-.topbar {
+/* === LENS GLASS === */
+.lens {
   position: fixed;
-  top: 18px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
+  width: 360px;
+  height: 90px;
+  border-radius: 40px;
+  backdrop-filter: url(#lens) blur(8px);
+  -webkit-backdrop-filter: url(#lens) blur(8px);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.25);
   display: flex;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  z-index: 10;
-}
-
-.btn {
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-size: 14px;
-}
-
-/* === DOCK === */
-.dock {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 14px;
-  padding: 14px 18px;
-  border-radius: 28px;
+  justify-content: space-around;
+  align-items: center;
   z-index: 10;
 }
 
 .icon {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  font-size: 26px;
-  border-radius: 16px;
-  transition: transform .25s ease;
-}
-
-.icon:hover {
-  transform: scale(1.35) translateY(-6px);
+  font-size: 34px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.4));
 }
 </style>
 </head>
 
 <body>
 
-<!-- SVG FILTER -->
+<div class="grid"></div>
+
+<!-- SVG LENS FILTER -->
 <svg width="0" height="0">
-  <filter id="liquid">
+  <filter id="lens">
+    <!-- vertical magnification -->
+    <feComponentTransfer>
+      <feFuncR type="gamma" amplitude="1.1" exponent="0.9"/>
+      <feFuncG type="gamma" amplitude="1.1" exponent="0.9"/>
+      <feFuncB type="gamma" amplitude="1.1" exponent="0.9"/>
+    </feComponentTransfer>
+
+    <!-- curved lens distortion -->
     <feTurbulence
-      id="turbulence"
       type="fractalNoise"
-      baseFrequency="0.012"
-      numOctaves="3"
-      seed="2"
-      result="noise" />
+      baseFrequency="0.008"
+      numOctaves="2"
+      seed="3"
+      result="noise"/>
+
     <feDisplacementMap
-      id="displacement"
       in="SourceGraphic"
       in2="noise"
-      scale="32"
+      scale="55"
       xChannelSelector="R"
-      yChannelSelector="G" />
+      yChannelSelector="G"/>
   </filter>
 </svg>
 
-<div class="topbar glass">
-  <div class="btn">کلید ۱</div>
-  <div class="btn">کلید ۲</div>
-  <div class="btn">کلید ۳</div>
-</div>
-
 <main>
-  <h1>نسخه زنده Liquid Glass</h1>
-
+  <h1>Liquid Lens Dock</h1>
   <p>
-    حالا شیشه کمی نفس می‌کشد. distortion بسیار ظریف است،
-    درست مثل ویدئوی مرجع.
+    این متن زیر داک قرار دارد. وقتی اسکرول می‌کنی،
+    دقیقاً می‌بینی که متن زیر داک کش می‌آید
+    و حالت شیشه محدب پیدا می‌کند.
   </p>
-
-  <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
-
   <p>
-    اسکرول کن و به واکنش شیشه دقت کن، مخصوصاً Dock.
+    این همان افکت تصویر مرجع است.
   </p>
-
-  <p>این بیشترین شباهت ممکن روی وب استاندارد است.</p>
 </main>
 
-<div class="dock glass">
-  <div class="icon">🏠</div>
-  <div class="icon">🔍</div>
-  <div class="icon">💬</div>
-  <div class="icon">⚙️</div>
+<div class="lens">
+  <div class="icon">😀</div>
+  <div class="icon">🟩</div>
+  <div class="icon">🌐</div>
+  <div class="icon">📅</div>
 </div>
-
-<script>
-/* === subtle animation like video === */
-const turb = document.getElementById("turbulence");
-const disp = document.getElementById("displacement");
-
-let t = 0;
-
-function animate() {
-  t += 0.003;
-  turb.setAttribute(
-    "baseFrequency",
-    `0.012 ${0.012 + Math.sin(t) * 0.002}`
-  );
-  requestAnimationFrame(animate);
-}
-animate();
-
-/* scroll reaction */
-window.addEventListener("scroll", () => {
-  const s = Math.min(window.scrollY / 600, 1);
-  disp.setAttribute("scale", 28 + s * 18);
-});
-</script>
 
 </body>
 </html>
