@@ -3,53 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>True Liquid Glass</title>
+<title>Liquid Glass – Enhanced</title>
 
 <style>
 html, body {
   margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  font-family: system-ui, -apple-system;
   background:
-    radial-gradient(circle at 20% 10%, #e0f2fe, transparent 55%),
-    radial-gradient(circle at 80% 30%, #f5d0fe, transparent 55%),
+    radial-gradient(circle at 15% 10%, #e0f2fe, transparent 55%),
+    radial-gradient(circle at 85% 30%, #f5d0fe, transparent 55%),
     linear-gradient(180deg, #f8fafc, #e5e7eb);
 }
 
 main {
-  max-width: 800px;
-  margin: 120px auto 300px;
+  max-width: 820px;
+  margin: 140px auto 300px;
   padding: 24px;
   line-height: 1.9;
 }
 
 img {
   width: 100%;
-  border-radius: 20px;
+  border-radius: 18px;
   margin: 40px 0;
 }
 
-/* ===== TRUE LIQUID GLASS ===== */
+/* === TRUE LIQUID GLASS === */
 .glass {
+  position: relative;
   backdrop-filter:
     url(#liquid)
     blur(18px)
-    saturate(1.2)
+    saturate(1.15)
     contrast(1.05);
   -webkit-backdrop-filter:
     url(#liquid)
     blur(18px)
-    saturate(1.2)
+    saturate(1.15)
     contrast(1.05);
 
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.25);
 }
 
-/* ===== TOP BUTTONS ===== */
+/* subtle light reflection */
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255,255,255,0.35),
+      transparent 70%
+    );
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* === TOP BAR === */
 .topbar {
   position: fixed;
-  top: 20px;
+  top: 18px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -65,7 +81,7 @@ img {
   font-size: 14px;
 }
 
-/* ===== DOCK ===== */
+/* === DOCK === */
 .dock {
   position: fixed;
   bottom: 18px;
@@ -96,19 +112,21 @@ img {
 
 <body>
 
-<!-- SVG FILTER (SAME IDEA AS jh3y) -->
+<!-- SVG FILTER -->
 <svg width="0" height="0">
   <filter id="liquid">
     <feTurbulence
+      id="turbulence"
       type="fractalNoise"
       baseFrequency="0.012"
       numOctaves="3"
-      seed="8"
+      seed="2"
       result="noise" />
     <feDisplacementMap
+      id="displacement"
       in="SourceGraphic"
       in2="noise"
-      scale="35"
+      scale="32"
       xChannelSelector="R"
       yChannelSelector="G" />
   </filter>
@@ -121,23 +139,20 @@ img {
 </div>
 
 <main>
-  <h1>Liquid Glass واقعی</h1>
+  <h1>نسخه زنده Liquid Glass</h1>
 
   <p>
-    این نسخه از افکت دقیقاً با همان منطق CodePen jh3y ساخته شده:
-    distortion واقعی، بدون کارت و بدون شادو.
+    حالا شیشه کمی نفس می‌کشد. distortion بسیار ظریف است،
+    درست مثل ویدئوی مرجع.
   </p>
 
   <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
 
   <p>
-    اسکرول کن. داک ثابت است ولی محتوای زیر آن حرکت می‌کند،
-    دقیقاً مثل iOS و visionOS.
+    اسکرول کن و به واکنش شیشه دقت کن، مخصوصاً Dock.
   </p>
 
-  <p>
-    این همان illusion اصلی است.
-  </p>
+  <p>این بیشترین شباهت ممکن روی وب استاندارد است.</p>
 </main>
 
 <div class="dock glass">
@@ -146,6 +161,30 @@ img {
   <div class="icon">💬</div>
   <div class="icon">⚙️</div>
 </div>
+
+<script>
+/* === subtle animation like video === */
+const turb = document.getElementById("turbulence");
+const disp = document.getElementById("displacement");
+
+let t = 0;
+
+function animate() {
+  t += 0.003;
+  turb.setAttribute(
+    "baseFrequency",
+    `0.012 ${0.012 + Math.sin(t) * 0.002}`
+  );
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* scroll reaction */
+window.addEventListener("scroll", () => {
+  const s = Math.min(window.scrollY / 600, 1);
+  disp.setAttribute("scale", 28 + s * 18);
+});
+</script>
 
 </body>
 </html>
