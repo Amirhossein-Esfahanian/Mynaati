@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NAATI Practice – Copper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Ionicons -->
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+
+    <style>
+      /* =====================================================
+         ROOT VARIABLES (Apple Music–like)
+      ===================================================== */
+      :root {
+        --accent: #007aff;
+
+        --bg-top: #e5f0ff;
+        --bg-bottom: #c9d6ff;
+
+        --bg-dark-top: #05070d;
+        --bg-dark-bottom: #050814;
+
+        --text-main: #121826;
+        --text-dark-main: #e5e7eb;
+
+        --glass-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+      }
+
+      /* =====================================================
+         GLOBAL
+      ===================================================== */
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text-main);
+
+        background: radial-gradient(
+            circle at 12% 20%,
+            rgba(20, 200, 250, 0.2),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 80% 0%,
+            rgba(199, 210, 254, 0.9),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 0% 95%,
+            rgba(209, 250, 229, 0.8),
+            transparent 55%
+          ),
+          linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+
+      body.dark {
+        background: radial-gradient(
+            circle at 10% 0,
+            rgba(30, 64, 175, 0.35),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 90% 95%,
+            rgba(56, 189, 248, 0.25),
+            transparent 55%
+          ),
+          linear-gradient(180deg, var(--bg-dark-top), var(--bg-dark-bottom));
+
+        color: var(--text-dark-main);
+      }
+
+      /* =====================================================
+         LAYOUT
+      ===================================================== */
+      #app {
+        min-height: 100vh;
+      }
+
+      /* =====================================================
+         SIDEBAR (Desktop fixed) + (Mobile panel)
+      ===================================================== */
+      #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+
+        background: rgba(10, 100, 255, 0.12);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+
+        border-right: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 14px 0 30px rgba(0, 0, 0, 0.25);
+
+        padding: 18px 14px;
+        z-index: 3000;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        transform: none; /* desktop default */
+        transition: transform 0.25s ease, width 0.25s ease, opacity 0.2s ease;
+      }
+      #sidebar::-webkit-scrollbar {
+        width: 6px;
+      }
+      #sidebar::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 10px;
+      }
+
+      body.dark #sidebar {
+        background: rgba(15, 23, 42, 0.85);
+        border-right: 1px solid rgba(148, 163, 184, 0.6);
+      }
+
+      #sidebar h3 {
+        margin: 6px 0 12px;
+      }
+
+      #sidebar.collapsed {
+        width: 0;
+        padding: 0;
+        opacity: 0;
+        overflow: hidden;
+        border: none;
+      }
+
+      .sheet-search {
+        width: 90%;
+        margin-bottom: 12px;
+        padding: 10px 14px;
+
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(14px);
+
+        font-size: 14px;
+        outline: none;
+      }
+
+      body.dark .sheet-search {
+        background: rgba(30, 41, 59, 0.8);
+        color: #f5f5f7;
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .sheet-item {
+        padding: 10px 12px;
+        margin-bottom: 8px;
+
+        background: rgba(255, 255, 255, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 14px;
+
+        display: flex;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: 0.25s;
+        user-select: none;
+      }
+
+      .sheet-item.active {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: var(--accent);
+        font-weight: 600;
+      }
+
+      body.dark .sheet-item.active {
+        background: rgba(19, 130, 194, 0.95);
+        border-color: var(--accent);
+        font-weight: 600;
+      }
+
+      /* =====================================================
+         MAIN
+      ===================================================== */
+      #main {
+        padding: 72px 16px 120px; /* bottom space for dock */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: margin 0.25s ease, width 0.25s ease;
+      }
+
+      #sheetTitle {
+        margin: 0 0 10px;
+        text-align: center;
+      }
+
+      #introContainer {
+        display: none;
+        justify-content: center;
+        margin: 14px 0 18px;
+      }
+
+      .intro-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        padding: 12px 26px;
+        border-radius: 999px;
+        border: none;
+
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+
+        background: linear-gradient(180deg, #3b82f6, #2563eb);
+        color: #fff;
+
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .intro-btn ion-icon {
+        font-size: 20px;
+      }
+      .intro-btn:active {
+        transform: scale(0.95);
+      }
+      .intro-btn.playing {
+        background: linear-gradient(180deg, #ef4444, #dc2626);
+        box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
+      }
+
+      #tableContainer {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* =====================================================
+         DIALOG CARD
+      ===================================================== */
+      .dialog-card {
+        width: 100%;
+        max-width: 1100px;
+
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(26px);
+        -webkit-backdrop-filter: blur(26px);
+
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 16px;
+
+        box-shadow: var(--glass-shadow);
+      }
+
+      body.dark .dialog-card {
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.45);
+      }
+
+      .dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+      }
+
+      .dialog-header .left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dialog-header .right {
+        display: flex;
+        gap: 6px;
+      }
+
+      .btn-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: none;
+        font-size: 22px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.1s;
+      }
+      .btn-circle:active {
+        transform: scale(0.92);
+      }
+
+      .btn-speaker {
+        background: #3b82f6;
+        color: #fff;
+      }
+      .btn-chat {
+        background: #e5e7eb;
+        color: #111;
+      }
+      .btn-mic {
+        background: #f59e0b;
+        color: #fff;
+      }
+      .btn-play {
+        background: #22c55e;
+        color: #fff;
+      }
+      .btn-info {
+        background: #e5e7eb;
+        color: #111;
+      }
+
+      .rec-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ef4444;
+        margin-right: 6px;
+
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        animation: recPulse 1s infinite;
+        display: none;
+      }
+
+      @keyframes recPulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+
+      .dialog-body {
+        display: none;
+      }
+      .dialog-body.open {
+        display: block;
+      }
+
+      .lang-box {
+        padding: 8px;
+        border-radius: 10px;
+        margin-top: 6px;
+      }
+
+      .lang-box.en {
+        background: #eef6ff;
+        direction: ltr;
+      }
+      .lang-box.fa {
+        background: #fff1f1;
+      }
+
+      body.dark .lang-box.en {
+        background: #3c6697;
+        direction: ltr;
+      }
+      body.dark .lang-box.fa {
+        background: #171e44;
+      }
+
+      /* highlight current dialog (dock controls target) */
+      .dialog-card.current {
+        outline: 2px solid rgba(0, 122, 255, 0.35);
+      }
+
+      /* =====================================================
+         VOCAB MODAL
+      ===================================================== */
+      .vocab-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        width: min(90vw, 520px);
+        max-height: 70vh;
+
+        display: none;
+        flex-direction: column;
+        gap: 16px;
+
+        background: linear-gradient(
+          180deg,
+          rgba(220, 235, 255, 0.9),
+          rgba(195, 220, 255, 0.78)
+        );
+
+        backdrop-filter: blur(34px) saturate(160%);
+        -webkit-backdrop-filter: blur(34px) saturate(160%);
+
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.55);
+
+        padding: 22px;
+
+        box-shadow: 0 35px 70px rgba(0, 60, 150, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+        z-index: 5000;
+      }
+
+      .vocab-title {
+        margin: 0;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1c1c1e;
+      }
+
+      .vocab-modal textarea {
+        width: 93%;
+        min-height: 220px;
+        max-height: 40vh;
+
+        resize: none;
+        border: none;
+        border-radius: 18px;
+
+        padding: 14px 16px;
+
+        background: rgba(255, 255, 255, 0.65);
+        color: #1c1c1e;
+
+        font-size: 15px;
+        line-height: 1.7;
+
+        box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+
+      .vocab-modal textarea:focus {
+        outline: none;
+      }
+
+      .vocab-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .vocab-btn {
+        min-width: 110px;
+        padding: 10px 22px;
+
+        border-radius: 999px;
+        border: none;
+
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+      }
+
+      .vocab-btn:active {
+        transform: scale(0.94);
+      }
+
+      .vocab-btn.copy {
+        background: linear-gradient(180deg, #34d399, #22c55e);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+      }
+
+      .vocab-btn.clear {
+        background: linear-gradient(180deg, #f87171, #ef4444);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+      }
+
+      body.dark .vocab-modal {
+        background: linear-gradient(
+          180deg,
+          rgba(45, 85, 145, 0.8),
+          rgba(30, 60, 115, 0.75)
+        );
+
+        border: 1px solid rgba(255, 255, 255, 0.18);
+
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      }
+
+      body.dark .vocab-title {
+        color: #f5f5f7;
+      }
+
+      body.dark .vocab-modal textarea {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f5f5f7;
+      }
+
+      /* =====================================================
+         TOAST
+      ===================================================== */
+      #toast {
+        position: fixed;
+        bottom: 104px; /* above dock */
+        left: 50%;
+        transform: translateX(-50%) translateY(12px);
+
+        min-width: 220px;
+        max-width: 85vw;
+
+        background: rgba(30, 30, 30, 0.78);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 14px;
+
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        z-index: 6000;
+      }
+
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      body:not(.dark) #toast {
+        background: rgba(255, 255, 255, 0.85);
+        color: #111;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      }
+
+      /* =====================================================
+         NEW: APPLE-LIKE GLASS DOCK BAR
+      ===================================================== */
+      .dock {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        padding: 10px 12px;
+
+        background: rgba(255, 255, 255, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        border-radius: 22px;
+
+        backdrop-filter: blur(22px) saturate(180%);
+        -webkit-backdrop-filter: blur(22px) saturate(180%);
+
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+        z-index: 9999;
+      }
+
+      body.dark .dock {
+        background: rgba(17, 24, 39, 0.55);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .dock button {
+        width: 46px;
+        height: 46px;
+        border: none;
+        border-radius: 16px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+        user-select: none;
+
+        background: rgba(255, 255, 255, 0.55);
+        color: #0f172a;
+
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        transition: transform 0.12s ease, box-shadow 0.12s ease,
+          background 0.12s ease;
+      }
+
+      .dock button:active {
+        transform: scale(0.94);
+      }
+
+      body.dark .dock button {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f5f5f7;
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+      }
+
+      .dock .primary {
+        background: linear-gradient(180deg, #3b82f6, #2563eb);
+        color: #fff;
+      }
+      body.dark .dock .primary {
+        background: linear-gradient(180deg, #60a5fa, #3b82f6);
+      }
+
+      .dock .danger {
+        background: linear-gradient(180deg, #ef4444, #dc2626);
+        color: #fff;
+      }
+
+      .dock .pill {
+        width: auto;
+        padding: 0 14px;
+        gap: 8px;
+        border-radius: 999px;
+      }
+
+      .dock ion-icon {
+        font-size: 22px;
+      }
+
+      /* =====================================================
+         MOBILE SIDEBAR PANEL (Glass)
+      ===================================================== */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: none;
+        z-index: 3200;
+      }
+
+      .mobile-panel {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        bottom: 90px; /* keep dock visible */
+
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 22px;
+
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
+
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.55);
+
+        transform: translateY(12px);
+        opacity: 0;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+
+        overflow: hidden;
+      }
+
+      body.dark .mobile-panel {
+        background: rgba(17, 24, 39, 0.62);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+      }
+
+      .mobile-panel header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 14px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+      }
+
+      body.dark .mobile-panel header {
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      .mobile-panel header h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .mobile-panel .panel-body {
+        height: calc(100% - 52px);
+        overflow: auto;
+        padding: 14px;
+      }
+
+      .overlay.show {
+        display: block;
+      }
+      .overlay.show .mobile-panel {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      /* =====================================================
+         DESKTOP LAYOUT
+      ===================================================== */
+      @media (min-width: 992px) {
+        #main {
+          margin-left: 260px;
+          width: calc(100% - 260px);
+        }
+
+        /* IMPORTANT: ~ not + (because there is a button between sidebar and main) */
+        #sidebar.collapsed ~ #main {
+          margin-left: 0;
+          width: 100%;
+        }
+
+        /* hide mobile panel overlay */
+        #mobileOverlay {
+          display: none !important;
+        }
+      }
+
+      @media (max-width: 991px) {
+        /* sidebar is still in DOM (needed for desktop), but we keep it off-canvas on mobile */
+        #sidebar {
+          transform: translateX(-110%);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Toast (inside body) -->
+    <div id="toast"><span id="toastBody"></span></div>
+
+    <div id="app">
+      <!-- Desktop Sidebar -->
+      <aside id="sidebar" aria-label="گفتگوها">
+        <h3>گفتگوها</h3>
+        <input
+          type="text"
+          id="sheetSearch"
+          placeholder="جستجوی گفتگو…"
+          class="sheet-search"
+        />
+        <div id="sheetList">در حال بارگذاری...</div>
+      </aside>
+
+      <!-- Main -->
+      <main id="main">
+        <h2 id="sheetTitle">—</h2>
+
+        <div id="introContainer" class="intro-wrapper">
+          <button id="introButton" class="intro-btn" type="button">
+            <ion-icon name="play"></ion-icon>
+            <span>پخش مقدمه گفتگو</span>
+          </button>
+        </div>
+
+        <div id="tableContainer"></div>
+      </main>
+    </div>
+
+    <!-- Mobile Sidebar Panel (Glass) -->
+    <div id="mobileOverlay" class="overlay" aria-hidden="true">
+      <div class="mobile-panel" role="dialog" aria-label="لیست گفتگوها">
+        <header>
+          <h3>گفتگوها</h3>
+          <button
+            id="closeMobilePanel"
+            class="btn-circle"
+            type="button"
+            title="بستن"
+          >
+            <ion-icon name="close"></ion-icon>
+          </button>
+        </header>
+        <div class="panel-body">
+          <input
+            type="text"
+            id="sheetSearchMobile"
+            placeholder="جستجوی گفتگو…"
+            class="sheet-search"
+          />
+          <div id="sheetListMobile">در حال بارگذاری...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vocab Panel -->
+    <div
+      id="vocabPanel"
+      class="vocab-modal"
+      role="dialog"
+      aria-label="لغات انتخابی"
+    >
+      <h2 class="vocab-title">لغات انتخابی</h2>
+      <textarea
+        id="vocabList"
+        placeholder="لغات انتخاب‌شده اینجا نمایش داده می‌شوند…"
+      ></textarea>
+      <div class="vocab-actions">
+        <button id="copyVocabBtn" class="vocab-btn copy" type="button">
+          کپی
+        </button>
+        <button id="clearVocabBtn" class="vocab-btn clear" type="button">
+          پاک
+        </button>
+      </div>
+    </div>
+
+    <!-- NEW DOCK BAR -->
+    <nav class="dock" aria-label="کنترل‌ها">
+      <!-- Mobile: open dialog list -->
+      <button
+        id="dockSheets"
+        type="button"
+        title="لیست گفتگوها"
+        aria-label="لیست گفتگوها"
+      >
+        <ion-icon name="list"></ion-icon>
+      </button>
+
+      <!-- Prev -->
+      <button id="dockPrev" type="button" title="قبلی" aria-label="قبلی">
+        <ion-icon name="play-skip-back"></ion-icon>
+      </button>
+
+      <!-- Play/Stop (dialog) -->
+      <button
+        id="dockPlay"
+        class="primary"
+        type="button"
+        title="پخش/توقف دیالوگ"
+        aria-label="پخش/توقف دیالوگ"
+      >
+        <ion-icon id="dockPlayIcon" name="play"></ion-icon>
+      </button>
+
+      <!-- Next -->
+      <button id="dockNext" type="button" title="بعدی" aria-label="بعدی">
+        <ion-icon name="play-skip-forward"></ion-icon>
+      </button>
+
+      <!-- Dark -->
+      <button
+        id="dockDark"
+        type="button"
+        title="دارک مود"
+        aria-label="دارک مود"
+      >
+        <ion-icon name="moon"></ion-icon>
+      </button>
+
+      <!-- Vocab -->
+      <button
+        id="dockVocab"
+        type="button"
+        title="دفترچه لغات"
+        aria-label="دفترچه لغات"
+      >
+        <ion-icon name="book"></ion-icon>
+      </button>
+    </nav>
+
+    <!-- XLSX (keep your local path) -->
+    <script src="Files/xlsx.full.min.js"></script>
+
+    <script>
+      // =========================
+      // State
+      // =========================
+      let workbook;
+      let currentAudio = null;
+      let currentBtn = null; // used for per-card speaker button
+      let currentSheetName = "";
+      let currentFolderIndex = 1;
+
+      let dialogCount = 0;
+      let currentDialogIndex = 1; // dock controls target
+      let dockPlaying = false;
+
+      // =========================
+      // Toast
+      // =========================
+      let toastTimer = null;
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        const body = document.getElementById("toastBody");
+        if (!toast || !body) return;
+        body.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      // =========================
+      // Helpers (safe text)
+      // =========================
+      function safeText(v) {
+        return (v ?? "").toString();
+      }
+
+      function setCurrentDialog(idx, scrollIntoView = true) {
+        if (!dialogCount) return;
+        currentDialogIndex = Math.max(1, Math.min(dialogCount, idx));
+
+        document.querySelectorAll(".dialog-card").forEach((card) => {
+          card.classList.remove("current");
+        });
+
+        const card = document.querySelector(
+          `.dialog-card[data-idx="${currentDialogIndex}"]`
+        );
+        if (card) {
+          card.classList.add("current");
+          if (scrollIntoView) {
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+      }
+
+      // =========================
+      // Audio: per-card play (speaker button)
+      // =========================
+      function stopAnyCurrentAudio(resetDockIcon = true) {
+        if (currentAudio) {
+          try {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+          } catch {}
+          currentAudio = null;
+        }
+        if (currentBtn) {
+          currentBtn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+          currentBtn = null;
+        }
+        if (resetDockIcon) {
+          dockPlaying = false;
+          updateDockPlayIcon(false);
+        }
+      }
+
+      function updateDockPlayIcon(isPlaying) {
+        const icon = document.getElementById("dockPlayIcon");
+        if (!icon) return;
+        icon.name = isPlaying ? "stop" : "play";
+        const dockPlay = document.getElementById("dockPlay");
+        dockPlay.classList.toggle("danger", isPlaying);
+        dockPlay.classList.toggle("primary", !isPlaying);
+      }
+
+      function playDialogByIndex(idx) {
+        // stop previous
+        stopAnyCurrentAudio(false);
+
+        setCurrentDialog(idx, true);
+
+        const folderName = encodeURIComponent(currentSheetName);
+        const rowNum = String(currentFolderIndex).padStart(3, "0");
+        const senNum = String(currentDialogIndex).padStart(2, "0");
+
+        const srcDash = `Files/Audio/${currentFolderIndex}-${folderName}/${rowNum}-${senNum}.mp3`;
+        const srcUnderscore = `Files/Audio/${currentFolderIndex}-${folderName}/${rowNum}_${senNum}.mp3`;
+
+        currentAudio = new Audio(srcDash);
+
+        dockPlaying = true;
+        updateDockPlayIcon(true);
+
+        // if dash missing -> try underscore; if both missing -> toast + reset
+        currentAudio.onerror = () => {
+          currentAudio = new Audio(srcUnderscore);
+          currentAudio.onerror = () => {
+            showToast("فایل صوتی این دیالوگ پیدا نشد");
+            stopAnyCurrentAudio(true);
+          };
+          currentAudio.onended = () => {
+            dockPlaying = false;
+            updateDockPlayIcon(false);
+          };
+          currentAudio.play();
+        };
+
+        currentAudio.onended = () => {
+          dockPlaying = false;
+          updateDockPlayIcon(false);
+        };
+
+        currentAudio.play();
+      }
+
+      // keep your per-card play behavior (speaker button)
+      function togglePlay(folder, name, row, sen, btn) {
+        // if same audio is playing via speaker button
+        if (currentAudio && currentBtn === btn) {
+          stopAnyCurrentAudio(true);
+          return;
+        }
+
+        // stop others
+        stopAnyCurrentAudio(false);
+
+        const srcDash = `Files/Audio/${folder}-${name}/${row}-${sen}.mp3`;
+        const srcUnderscore = `Files/Audio/${folder}-${name}/${row}_${sen}.mp3`;
+
+        currentAudio = new Audio(srcDash);
+        currentBtn = btn;
+        btn.innerHTML = `<ion-icon name="stop"></ion-icon>`;
+
+        dockPlaying = false; // speaker button is separate from dock
+        updateDockPlayIcon(false);
+
+        currentAudio.onerror = () => {
+          currentAudio = new Audio(srcUnderscore);
+
+          currentAudio.onerror = () => {
+            showToast("فایل صوتی پیدا نشد");
+            if (currentBtn)
+              currentBtn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+            stopAnyCurrentAudio(false);
+          };
+
+          currentAudio.onended = () => {
+            if (btn) btn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+            stopAnyCurrentAudio(false);
+          };
+
+          currentAudio.play();
+        };
+
+        currentAudio.onended = () => {
+          if (btn) btn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+          stopAnyCurrentAudio(false);
+        };
+
+        currentAudio.play();
+      }
+
+      // =========================
+      // Intro Audio
+      // =========================
+      let introAudio = null;
+      let introPlaying = false;
+
+      function updateIntroButton(isPlaying) {
+        const btn = document.getElementById("introButton");
+        if (!btn) return;
+        btn.classList.toggle("playing", isPlaying);
+        btn.querySelector("ion-icon").name = isPlaying ? "stop" : "play";
+      }
+
+      function playIntro(folderIndex, folderName) {
+        const introNum = String(folderIndex).padStart(3, "0");
+        const src = `Files/Audio/${folderIndex}-${folderName}/${introNum}.mp3`;
+
+        if (introAudio && introPlaying) {
+          introAudio.pause();
+          introAudio.currentTime = 0;
+          introPlaying = false;
+          updateIntroButton(false);
+          return;
+        }
+
+        introAudio = new Audio(src);
+        introPlaying = true;
+        updateIntroButton(true);
+
+        introAudio.onended = () => {
+          introPlaying = false;
+          updateIntroButton(false);
+        };
+
+        introAudio.onerror = () => {
+          showToast("فایل مقدمه گفتگو پیدا نشد");
+          introPlaying = false;
+          updateIntroButton(false);
+        };
+
+        introAudio.play();
+      }
+
+      // =========================
+      // Toggle text
+      // =========================
+      function toggleText(i) {
+        const el = document.getElementById(`dialog_${i}`);
+        if (!el) return;
+        el.classList.toggle("open");
+      }
+
+      // =========================
+      // Vocabulary
+      // =========================
+      function addSelectedWord(sentenceIndex) {
+        const selection = window.getSelection().toString().trim();
+        if (!selection) {
+          showToast("اول یک کلمه یا عبارت را انتخاب کن");
+          return;
+        }
+        const ta = document.getElementById("vocabList");
+        const line = `[${currentSheetName} | جمله ${sentenceIndex}] ${selection}\n`;
+        ta.value += line;
+        localStorage.setItem("myVocab", ta.value);
+        showToast("لغت اضافه شد 📒");
+      }
+
+      function toggleVocabPanel(force) {
+        const panel = document.getElementById("vocabPanel");
+        if (!panel) return;
+        const isOpen = panel.style.display === "flex";
+        const next = force === undefined ? !isOpen : !!force;
+        panel.style.display = next ? "flex" : "none";
+      }
+
+      function copyVocab() {
+        const ta = document.getElementById("vocabList");
+        if (!ta.value.trim()) {
+          showToast("لیست لغات خالی است");
+          return;
+        }
+        navigator.clipboard.writeText(ta.value);
+        showToast("لغات کپی شد ✅");
+      }
+
+      function clearVocab() {
+        const ta = document.getElementById("vocabList");
+        if (!ta.value.trim()) return;
+        if (confirm("همه لغات پاک شوند؟")) {
+          ta.value = "";
+          localStorage.removeItem("myVocab");
+          showToast("لغات پاک شدند 🗑");
+        }
+      }
+
+      // close vocab when clicking outside
+      document.addEventListener("click", (e) => {
+        const panel = document.getElementById("vocabPanel");
+        const btn = document.getElementById("dockVocab");
+        if (!panel) return;
+        if (panel.style.display !== "flex") return;
+        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+          panel.style.display = "none";
+        }
+      });
+
+      // =========================
+      // Recording (kept same; webm might not work on all Safari)
+      // =========================
+      let mediaRecorder = null;
+      let mediaStream = null;
+      let recordedChunks = [];
+      let recordingIndex = null;
+
+      async function startRec(index) {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+          return;
+        }
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          recordedChunks = [];
+          recordingIndex = index;
+
+          // safer: let browser pick mime
+          mediaRecorder = new MediaRecorder(mediaStream);
+
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) recordedChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, {
+              type: mediaRecorder.mimeType,
+            });
+            const url = URL.createObjectURL(blob);
+            const audioEl = document.getElementById(
+              `myAudio_${recordingIndex}`
+            );
+            if (audioEl) {
+              audioEl.src = url;
+              audioEl.style.display = "block";
+            }
+            const dot = document.getElementById(`rec_${recordingIndex}`);
+            if (dot) dot.style.display = "none";
+            mediaStream.getTracks().forEach((t) => t.stop());
+            mediaRecorder = null;
+            recordingIndex = null;
+          };
+
+          mediaRecorder.start();
+          const dot = document.getElementById(`rec_${index}`);
+          if (dot) dot.style.display = "inline-block";
+        } catch {
+          showToast("دسترسی میکروفون امکان‌پذیر نیست");
+        }
+      }
+
+      function playRecorded(index) {
+        const audioEl = document.getElementById(`myAudio_${index}`);
+        if (!audioEl || !audioEl.src) {
+          showToast("صدایی ضبط نشده است");
+          return;
+        }
+        audioEl.currentTime = 0;
+        audioEl.play();
+      }
+
+      // =========================
+      // Load Excel + render sheets
+      // =========================
+      function buildSheetItem(name, i, forMobile = false) {
+        const div = document.createElement("div");
+        div.className = "sheet-item";
+        div.innerHTML = `<ion-icon name="chevron-back-outline"></ion-icon><span>${name}</span>`;
+        div.addEventListener("click", () => {
+          selectSheet(name, i + 1, div);
+          // close mobile panel when selecting
+          closeMobilePanel();
+        });
+        return div;
+      }
+
+      function selectSheet(name, folderIndex, el) {
+        currentSheetName = name;
+        currentFolderIndex = folderIndex;
+
+        document
+          .querySelectorAll(".sheet-item")
+          .forEach((e) => e.classList.remove("active"));
+        if (el) el.classList.add("active");
+
+        document.getElementById("sheetTitle").textContent = name;
+
+        // intro
+        const intro = document.getElementById("introContainer");
+        intro.style.display = "flex";
+        const introBtn = document.getElementById("introButton");
+        introBtn.onclick = () =>
+          playIntro(folderIndex, encodeURIComponent(name));
+
+        loadSheet(name, folderIndex);
+      }
+
+      function loadSheet(name, folderIndex) {
+        stopAnyCurrentAudio(true);
+
+        const ws = workbook.Sheets[name];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+        const container = document.getElementById("tableContainer");
+        container.innerHTML = "";
+
+        let idx = 1;
+
+        for (let i = 1; i < rows.length - 2; i += 2) {
+          const speaker = safeText(rows[i]?.[0] || "");
+          const en = safeText(rows[i]?.[1] || "");
+          const fa = safeText(rows[i + 1]?.[1] || "");
+
+          const folderName = encodeURIComponent(name);
+          const rowNum = String(folderIndex).padStart(3, "0");
+          const senNum = String(idx).padStart(2, "0");
+
+          const card = document.createElement("div");
+          card.className = "dialog-card";
+          card.dataset.idx = String(idx);
+
+          const header = document.createElement("div");
+          header.className = "dialog-header";
+
+          const left = document.createElement("div");
+          left.className = "left";
+          left.innerHTML = `<span><b>#${idx}</b> | ${speaker}</span><span id="rec_${idx}" class="rec-dot"></span>`;
+
+          const right = document.createElement("div");
+          right.className = "right";
+
+          const btnSpeaker = document.createElement("button");
+          btnSpeaker.className = "btn-circle btn-speaker";
+          btnSpeaker.type = "button";
+          btnSpeaker.title = "پخش صوت";
+          btnSpeaker.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+          btnSpeaker.addEventListener("click", () =>
+            togglePlay(folderIndex, folderName, rowNum, senNum, btnSpeaker)
+          );
+
+          const btnChat = document.createElement("button");
+          btnChat.className = "btn-circle btn-chat";
+          btnChat.type = "button";
+          btnChat.title = "نمایش متن";
+          btnChat.innerHTML = `<ion-icon name="chatbubble-ellipses-outline"></ion-icon>`;
+          btnChat.addEventListener("click", () => toggleText(idx));
+
+          const btnInfo = document.createElement("button");
+          btnInfo.className = "btn-circle btn-info";
+          btnInfo.type = "button";
+          btnInfo.title = "افزودن لغت انتخاب‌شده";
+          btnInfo.innerHTML = `<ion-icon name="add-outline"></ion-icon>`;
+          btnInfo.addEventListener("click", () => addSelectedWord(idx));
+
+          const btnMic = document.createElement("button");
+          btnMic.className = "btn-circle btn-mic";
+          btnMic.type = "button";
+          btnMic.title = "ضبط صدا";
+          btnMic.innerHTML = `<ion-icon name="mic"></ion-icon>`;
+          btnMic.addEventListener("click", () => startRec(idx));
+
+          const btnPlayRec = document.createElement("button");
+          btnPlayRec.className = "btn-circle btn-play";
+          btnPlayRec.type = "button";
+          btnPlayRec.title = "پخش ضبط";
+          btnPlayRec.innerHTML = `<ion-icon name="play"></ion-icon>`;
+          btnPlayRec.addEventListener("click", () => playRecorded(idx));
+
+          right.appendChild(btnSpeaker);
+          right.appendChild(btnChat);
+          right.appendChild(btnInfo);
+          right.appendChild(btnMic);
+          right.appendChild(btnPlayRec);
+
+          header.appendChild(left);
+          header.appendChild(right);
+
+          const body = document.createElement("div");
+          body.className = "dialog-body";
+          body.id = `dialog_${idx}`;
+
+          const boxEn = document.createElement("div");
+          boxEn.className = "lang-box en";
+          boxEn.innerHTML = `<b>EN:</b> `;
+          const enSpan = document.createElement("span");
+          enSpan.textContent = en;
+          boxEn.appendChild(enSpan);
+
+          const boxFa = document.createElement("div");
+          boxFa.className = "lang-box fa";
+          boxFa.innerHTML = `<b>FA:</b> `;
+          const faSpan = document.createElement("span");
+          faSpan.textContent = fa;
+          boxFa.appendChild(faSpan);
+
+          const recAudio = document.createElement("audio");
+          recAudio.id = `myAudio_${idx}`;
+          recAudio.controls = true;
+          recAudio.style.display = "none";
+          recAudio.style.marginTop = "8px";
+
+          body.appendChild(boxEn);
+          body.appendChild(boxFa);
+          body.appendChild(recAudio);
+
+          card.appendChild(header);
+          card.appendChild(body);
+
+          // clicking card sets current dialog for dock controls
+          card.addEventListener("click", (e) => {
+            // don't hijack clicks on buttons
+            if (e.target.closest("button")) return;
+            setCurrentDialog(idx, false);
+          });
+
+          container.appendChild(card);
+          idx++;
+        }
+
+        dialogCount = idx - 1;
+        setCurrentDialog(1, false);
+      }
+
+      // =========================
+      // Mobile panel open/close
+      // =========================
+      function openMobilePanel() {
+        const overlay = document.getElementById("mobileOverlay");
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+
+      function closeMobilePanel() {
+        const overlay = document.getElementById("mobileOverlay");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      // =========================
+      // Filters
+      // =========================
+      function filterSheetList(q, listRoot) {
+        const query = (q || "").toLowerCase();
+        listRoot.querySelectorAll(".sheet-item").forEach((item) => {
+          const text = item.innerText.toLowerCase();
+          item.style.display = text.includes(query) ? "flex" : "none";
+        });
+      }
+
+      // =========================
+      // Boot
+      // =========================
+      window.addEventListener("load", async () => {
+        // restore dark mode
+        if (localStorage.getItem("darkMode") === "on") {
+          document.body.classList.add("dark");
+        }
+
+        // restore vocab
+        const saved = localStorage.getItem("myVocab");
+        if (saved) document.getElementById("vocabList").value = saved;
+
+        // load excel
+        try {
+          const buf = await (await fetch("Conversations.xlsx")).arrayBuffer();
+          workbook = XLSX.read(buf, { type: "array" });
+        } catch (e) {
+          showToast("Conversations.xlsx لود نشد");
+          console.error(e);
+          return;
+        }
+
+        // build desktop list
+        const list = document.getElementById("sheetList");
+        list.innerHTML = "";
+        workbook.SheetNames.forEach((name, i) => {
+          const item = buildSheetItem(name, i, false);
+          list.appendChild(item);
+        });
+
+        // build mobile list
+        const listM = document.getElementById("sheetListMobile");
+        listM.innerHTML = "";
+        workbook.SheetNames.forEach((name, i) => {
+          const item = buildSheetItem(name, i, true);
+          listM.appendChild(item.cloneNode(true)); // clone then rebind
+        });
+        // rebind cloned mobile items with correct handlers:
+        listM.innerHTML = "";
+        workbook.SheetNames.forEach((name, i) => {
+          listM.appendChild(buildSheetItem(name, i, true));
+        });
+
+        // default sheet
+        const firstName = workbook.SheetNames[0];
+        const firstItem = list.querySelector(".sheet-item");
+        selectSheet(firstName, 1, firstItem);
+
+        // =========================
+        // Events: search
+        // =========================
+        document
+          .getElementById("sheetSearch")
+          .addEventListener("input", (e) => {
+            filterSheetList(
+              e.target.value,
+              document.getElementById("sheetList")
+            );
+          });
+
+        document
+          .getElementById("sheetSearchMobile")
+          .addEventListener("input", (e) => {
+            filterSheetList(
+              e.target.value,
+              document.getElementById("sheetListMobile")
+            );
+          });
+
+        // =========================
+        // Events: mobile overlay close
+        // =========================
+        document
+          .getElementById("closeMobilePanel")
+          .addEventListener("click", closeMobilePanel);
+        document
+          .getElementById("mobileOverlay")
+          .addEventListener("click", (e) => {
+            // click outside panel closes
+            if (e.target.id === "mobileOverlay") closeMobilePanel();
+          });
+
+        // =========================
+        // Events: vocab buttons
+        // =========================
+        document
+          .getElementById("copyVocabBtn")
+          .addEventListener("click", copyVocab);
+        document
+          .getElementById("clearVocabBtn")
+          .addEventListener("click", clearVocab);
+
+        // =========================
+        // DOCK events
+        // =========================
+        document.getElementById("dockSheets").addEventListener("click", () => {
+          // mobile: glass panel
+          if (window.innerWidth < 992) {
+            openMobilePanel();
+            return;
+          }
+          // desktop: collapse/expand sidebar
+          const sidebar = document.getElementById("sidebar");
+          sidebar.classList.toggle("collapsed");
+        });
+
+        document.getElementById("dockPrev").addEventListener("click", () => {
+          const wasPlaying = dockPlaying;
+          setCurrentDialog(currentDialogIndex - 1, true);
+          if (wasPlaying) playDialogByIndex(currentDialogIndex);
+        });
+
+        document.getElementById("dockNext").addEventListener("click", () => {
+          const wasPlaying = dockPlaying;
+          setCurrentDialog(currentDialogIndex + 1, true);
+          if (wasPlaying) playDialogByIndex(currentDialogIndex);
+        });
+
+        document.getElementById("dockPlay").addEventListener("click", () => {
+          if (!dialogCount) return;
+
+          if (dockPlaying && currentAudio) {
+            stopAnyCurrentAudio(true);
+            return;
+          }
+          playDialogByIndex(currentDialogIndex);
+        });
+
+        document.getElementById("dockDark").addEventListener("click", () => {
+          document.body.classList.toggle("dark");
+          if (document.body.classList.contains("dark")) {
+            localStorage.setItem("darkMode", "on");
+            showToast("دارک مود فعال شد 🌙");
+          } else {
+            localStorage.setItem("darkMode", "off");
+            showToast("لایت مود فعال شد ☀️");
+          }
+        });
+
+        document.getElementById("dockVocab").addEventListener("click", () => {
+          const panel = document.getElementById("vocabPanel");
+          const isOpen = panel.style.display === "flex";
+          toggleVocabPanel(!isOpen);
+        });
+      });
+    </script>
+  </body>
+</html>
