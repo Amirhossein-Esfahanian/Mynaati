@@ -1,4 +1,6 @@
 let workbook;
+
+// sentence audio player
 let currentAudio = null;
 let currentBtn = null;
 let currentSheetName = "";
@@ -47,6 +49,7 @@ window.onload = async () => {
   if (saved) document.getElementById("vocabList").value = saved;
 };
 
+/* ---------------- Select Sheet ---------------- */
 function selectSheet(name, folderIndex, el) {
   document
     .querySelectorAll(".sheet-item")
@@ -132,6 +135,7 @@ function loadSheet(name, folderIndex) {
    Audio Play
 ========================= */
 function togglePlay(folder, name, row, sen, btn) {
+  // اگر همان دکمه است => Stop
   if (currentAudio && currentBtn === btn) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
@@ -141,11 +145,20 @@ function togglePlay(folder, name, row, sen, btn) {
     return;
   }
 
+  // هر صوت دیگری را متوقف کن
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
-    if (currentBtn)
+    if (currentBtn) {
       currentBtn.innerHTML = `<ion-icon name="volume-high"></ion-icon>`;
+    }
+  }
+
+  // اگر Intro در حال پخش است، متوقفش کن
+  if (introAudio && !introAudio.paused) {
+    introAudio.pause();
+    introAudio.currentTime = 0;
+    resetIntroButton();
   }
 
   const srcDash = `Files/Audio/${folder}-${name}/${row}-${sen}.mp3`;

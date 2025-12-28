@@ -57,7 +57,7 @@ body.dark {
 ===================================================== */
 /* .toggle-dark {
   position: fixed;
-  top: 12px;
+  top: 32px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -297,7 +297,6 @@ body.dark .dialog-card {
 .dialog-body {
   display: none;
 }
-
 .lang-box {
   padding: 8px;
   border-radius: 10px;

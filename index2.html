@@ -2,6 +2,117 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquid Lens Dock</title>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system;
+        background: radial-gradient(circle at 50% 20%, #1f2933, #000);
+        color: white;
+        height: 200vh;
+      }
+
+      main {
+        max-width: 900px;
+        margin: 160px auto;
+        padding: 24px;
+        line-height: 2;
+      }
+
+      .grid {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(
+            rgba(255, 255, 255, 0.08) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 80px 80px;
+        pointer-events: none;
+      }
+
+      /* === LENS GLASS === */
+      .lens {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 360px;
+        height: 90px;
+        border-radius: 40px;
+        backdrop-filter: url(#lens) blur(8px);
+        -webkit-backdrop-filter: url(#lens) blur(8px);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 10;
+      }
+
+      .icon {
+        font-size: 34px;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="grid"></div>
+
+    <!-- SVG LENS FILTER -->
+    <svg width="0" height="0">
+      <filter id="lens">
+        <!-- vertical magnification -->
+        <feComponentTransfer>
+          <feFuncR type="gamma" amplitude="1.1" exponent="0.9" />
+          <feFuncG type="gamma" amplitude="1.1" exponent="0.9" />
+          <feFuncB type="gamma" amplitude="1.1" exponent="0.9" />
+        </feComponentTransfer>
+
+        <!-- curved lens distortion -->
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.008"
+          numOctaves="2"
+          seed="3"
+          result="noise"
+        />
+
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="55"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </svg>
+
+    <main>
+      <h1>Liquid Lens Dock</h1>
+      <p>
+        این متن زیر داک قرار دارد. وقتی اسکرول می‌کنی، دقیقاً می‌بینی که متن زیر
+        داک کش می‌آید و حالت شیشه محدب پیدا می‌کند.
+      </p>
+      <p>این همان افکت تصویر مرجع است.</p>
+    </main>
+
+    <div class="lens">
+      <div class="icon">😀</div>
+      <div class="icon">🟩</div>
+      <div class="icon">🌐</div>
+      <div class="icon">📅</div>
+    </div>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
     <title>NAATI Practice – Copper</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
