@@ -421,6 +421,22 @@
         z-index: 5000;
       }
 
+      /* sheet dialog shown as sidebar */
+      .vocab-modal.as-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 260px;
+        height: 100vh;
+        max-width: 260px;
+        max-height: 100vh;
+        border-radius: 0 14px 14px 0;
+        padding: 12px;
+        overflow: auto;
+        z-index: 6000;
+      }
+
       .vocab-title {
         margin: 0;
         text-align: center;
@@ -722,12 +738,6 @@
       ===================================================== */
       @media (min-width: 992px) {
         #main {
-          margin-left: 260px;
-          width: calc(100% - 260px);
-        }
-
-        /* IMPORTANT: ~ not + (because there is a button between sidebar and main) */
-        #sidebar.collapsed ~ #main {
           margin-left: 0;
           width: 100%;
         }
@@ -752,17 +762,7 @@
     <div id="toast"><span id="toastBody"></span></div>
 
     <div id="app">
-      <!-- Desktop Sidebar -->
-      <aside id="sidebar" aria-label="گفتگوها">
-        <h3>گفتگوها</h3>
-        <input
-          type="text"
-          id="sheetSearch"
-          placeholder="جستجوی گفتگو…"
-          class="sheet-search"
-        />
-        <div id="sheetList">در حال بارگذاری...</div>
-      </aside>
+      <!-- (Desktop sidebar removed; use sheet dialog instead) -->
 
       <!-- Main -->
       <main id="main">
@@ -802,6 +802,36 @@
           />
           <div id="sheetListMobile">در حال بارگذاری...</div>
         </div>
+      </div>
+    </div>
+
+    <!-- Sheet Dialog (desktop) -->
+    <div
+      id="sheetDialog"
+      class="vocab-modal"
+      role="dialog"
+      aria-label="لیست گفتگوها"
+      style="display: none; max-width: 520px"
+    >
+      <h2 class="vocab-title">گفتگوها</h2>
+      <input
+        type="text"
+        id="sheetSearchDialog"
+        placeholder="جستجوی گفتگو…"
+        class="sheet-search"
+        style="width: 92%; margin: 8px auto 6px"
+      />
+      <div
+        id="sheetListDialog"
+        style="width: 100%; max-height: 50vh; overflow: auto; padding: 4px"
+      ></div>
+      <div style="display: flex; justify-content: center; gap: 12px">
+        <button id="toggleSheetAsSidebar" class="vocab-btn copy" type="button">
+          نمایش به صورت سایدبار
+        </button>
+        <button id="closeSheetDialog" class="vocab-btn clear" type="button">
+          بستن
+        </button>
       </div>
     </div>
 
@@ -1162,6 +1192,41 @@
         }
       });
 
+      // close sheet dialog when clicking outside or pressing close
+      document.addEventListener("click", (e) => {
+        const dlg = document.getElementById("sheetDialog");
+        const btn = document.getElementById("dockSheets");
+        if (!dlg) return;
+        if (dlg.style.display !== "flex") return;
+        if (!dlg.contains(e.target) && !btn.contains(e.target)) {
+          closeSheetDialog();
+        }
+      });
+
+      const closeSheetBtn = document.getElementById("closeSheetDialog");
+      if (closeSheetBtn)
+        closeSheetBtn.addEventListener("click", () => closeSheetDialog());
+
+      const toggleAsSidebarBtn = document.getElementById(
+        "toggleSheetAsSidebar"
+      );
+      if (toggleAsSidebarBtn) {
+        toggleAsSidebarBtn.addEventListener("click", () => {
+          const d = document.getElementById("sheetDialog");
+          const main = document.getElementById("main");
+          if (!d) return;
+          const on = !d.classList.contains("as-sidebar");
+          if (on) {
+            d.classList.add("as-sidebar");
+            d.style.display = "flex";
+            if (main) main.style.marginLeft = "260px";
+          } else {
+            d.classList.remove("as-sidebar");
+            if (main) main.style.marginLeft = "0";
+          }
+        });
+      }
+
       // =========================
       // Recording (kept same; webm might not work on all Safari)
       // =========================
@@ -1235,8 +1300,8 @@
         div.innerHTML = `<ion-icon name="chevron-back-outline"></ion-icon><span>${name}</span>`;
         div.addEventListener("click", () => {
           selectSheet(name, i + 1, div);
-          // close mobile panel when selecting
-          closeMobilePanel();
+          // close mobile panel when selecting (mobile behavior)
+          if (forMobile) closeMobilePanel();
         });
         return div;
       }
@@ -1404,6 +1469,27 @@
       }
 
       // =========================
+      // Sheet dialog (desktop)
+      // =========================
+      function openSheetDialog() {
+        const d = document.getElementById("sheetDialog");
+        if (!d) return;
+        d.style.display = "flex";
+      }
+
+      function closeSheetDialog() {
+        const d = document.getElementById("sheetDialog");
+        if (!d) return;
+        // if dialog was shown as sidebar, remove sidebar mode when closing
+        if (d.classList.contains("as-sidebar")) {
+          d.classList.remove("as-sidebar");
+          const main = document.getElementById("main");
+          if (main) main.style.marginLeft = "0";
+        }
+        d.style.display = "none";
+      }
+
+      // =========================
       // Filters
       // =========================
       function filterSheetList(q, listRoot) {
@@ -1437,13 +1523,18 @@
           return;
         }
 
-        // build desktop list
-        const list = document.getElementById("sheetList");
-        list.innerHTML = "";
-        workbook.SheetNames.forEach((name, i) => {
-          const item = buildSheetItem(name, i, false);
-          list.appendChild(item);
-        });
+        // build desktop list (use dialog container as desktop list)
+        const list =
+          document.getElementById("sheetListDialog") ||
+          document.getElementById("sheetList") ||
+          document.getElementById("sheetListMobile");
+        if (list) {
+          list.innerHTML = "";
+          workbook.SheetNames.forEach((name, i) => {
+            const item = buildSheetItem(name, i, false);
+            list.appendChild(item);
+          });
+        }
 
         // build mobile list
         const listM = document.getElementById("sheetListMobile");
@@ -1458,22 +1549,37 @@
           listM.appendChild(buildSheetItem(name, i, true));
         });
 
+        // build desktop dialog list
+        const listD = document.getElementById("sheetListDialog");
+        if (listD) {
+          listD.innerHTML = "";
+          workbook.SheetNames.forEach((name, i) => {
+            const itemD = buildSheetItem(name, i, false);
+            // ensure dialog closes after selection
+            itemD.addEventListener("click", () => closeSheetDialog());
+            listD.appendChild(itemD);
+          });
+        }
+
         // default sheet
         const firstName = workbook.SheetNames[0];
-        const firstItem = list.querySelector(".sheet-item");
+        const firstItem = list ? list.querySelector(".sheet-item") : null;
         selectSheet(firstName, 1, firstItem);
 
         // =========================
         // Events: search
         // =========================
-        document
-          .getElementById("sheetSearch")
-          .addEventListener("input", (e) => {
-            filterSheetList(
-              e.target.value,
-              document.getElementById("sheetList")
-            );
+        const desktopSearchEl =
+          document.getElementById("sheetSearchDialog") ||
+          document.getElementById("sheetSearch");
+        const desktopListRoot =
+          document.getElementById("sheetListDialog") ||
+          document.getElementById("sheetList");
+        if (desktopSearchEl && desktopListRoot) {
+          desktopSearchEl.addEventListener("input", (e) => {
+            filterSheetList(e.target.value, desktopListRoot);
           });
+        }
 
         document
           .getElementById("sheetSearchMobile")
@@ -1516,9 +1622,8 @@
             openMobilePanel();
             return;
           }
-          // desktop: collapse/expand sidebar
-          const sidebar = document.getElementById("sidebar");
-          sidebar.classList.toggle("collapsed");
+          // desktop: open the centered sheet dialog
+          openSheetDialog();
         });
 
         document.getElementById("dockPrev").addEventListener("click", () => {
