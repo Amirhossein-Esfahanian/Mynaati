@@ -37,7 +37,7 @@ window.onload = async () => {
   workbook.SheetNames.forEach((name, i) => {
     const div = document.createElement("div");
     div.className = "sheet-item";
-    div.innerHTML = `<ion-icon name="chevron-back-outline"></ion-icon><span style="direction: ltr;">${i} - ${name} </span>`;
+    div.innerHTML = `<ion-icon name="chevron-back-outline"></ion-icon><span style="direction: ltr;">${i}- ${name} </span>`;
     div.onclick = () => selectSheet(name, i + 1, div);
     list.appendChild(div);
   });
