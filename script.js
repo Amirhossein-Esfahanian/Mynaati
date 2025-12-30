@@ -78,10 +78,15 @@ function loadSheet(name, folderIndex) {
   let html = "";
   let idx = 1;
 
-  for (let i = 1; i < rows.length - 2; i += 2) {
-    const speaker = rows[i]?.[0] || "";
-    const en = rows[i]?.[1] || "";
-    const fa = rows[i + 1]?.[1] || "";
+  for (let i = 1; i < rows.length; i += 2) {
+    if (!rows[i] || !rows[i + 1]) continue;
+
+    const speaker = rows[i][0] || "";
+    const en = rows[i][1] || "";
+    const fa = rows[i + 1][1] || "";
+
+    // ⛔ اگر هر دو خالی‌اند، کارت نساز
+    if (!en && !fa) continue;
 
     const folderName = encodeURIComponent(name);
     const rowNum = String(folderIndex).padStart(3, "0");
