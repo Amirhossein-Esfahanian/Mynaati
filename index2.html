@@ -421,6 +421,20 @@
         z-index: 5000;
       }
 
+      /* macOS-like glass window style */
+      .glass-window {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.55),
+          rgba(245, 245, 255, 0.35)
+        );
+        backdrop-filter: blur(28px) saturate(150%);
+        -webkit-backdrop-filter: blur(28px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        box-shadow: 0 30px 60px rgba(2, 6, 23, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      }
+
       /* sheet dialog shown as sidebar */
       .vocab-modal.as-sidebar {
         position: fixed;
@@ -781,7 +795,11 @@
 
     <!-- Mobile Sidebar Panel (Glass) -->
     <div id="mobileOverlay" class="overlay" aria-hidden="true">
-      <div class="mobile-panel" role="dialog" aria-label="لیست گفتگوها">
+      <div
+        class="mobile-panel glass-window"
+        role="dialog"
+        aria-label="لیست گفتگوها"
+      >
         <header>
           <h3>گفتگوها</h3>
           <button
@@ -808,7 +826,7 @@
     <!-- Sheet Dialog (desktop) -->
     <div
       id="sheetDialog"
-      class="vocab-modal"
+      class="vocab-modal glass-window"
       role="dialog"
       aria-label="لیست گفتگوها"
       style="display: none; max-width: 520px"
@@ -838,7 +856,7 @@
     <!-- Vocab Panel -->
     <div
       id="vocabPanel"
-      class="vocab-modal"
+      class="vocab-modal glass-window"
       role="dialog"
       aria-label="لغات انتخابی"
     >
@@ -927,6 +945,8 @@
       let dialogCount = 0;
       let currentDialogIndex = 1; // dock controls target
       let dockPlaying = false;
+      // preserve sheet dialog scroll between opens
+      let sheetDialogScroll = 0;
 
       // =========================
       // Toast
@@ -1198,6 +1218,8 @@
         const btn = document.getElementById("dockSheets");
         if (!dlg) return;
         if (dlg.style.display !== "flex") return;
+        // don't close when in sidebar mode
+        if (dlg.classList.contains("as-sidebar")) return;
         if (!dlg.contains(e.target) && !btn.contains(e.target)) {
           closeSheetDialog();
         }
@@ -1211,6 +1233,15 @@
         "toggleSheetAsSidebar"
       );
       if (toggleAsSidebarBtn) {
+        // initialize button label based on current state
+        const dlgInit = document.getElementById("sheetDialog");
+        if (dlgInit)
+          toggleAsSidebarBtn.textContent = dlgInit.classList.contains(
+            "as-sidebar"
+          )
+            ? "نمایش به صورت پنجره"
+            : "نمایش به صورت سایدبار";
+
         toggleAsSidebarBtn.addEventListener("click", () => {
           const d = document.getElementById("sheetDialog");
           const main = document.getElementById("main");
@@ -1220,9 +1251,11 @@
             d.classList.add("as-sidebar");
             d.style.display = "flex";
             if (main) main.style.marginLeft = "260px";
+            toggleAsSidebarBtn.textContent = "نمایش به صورت پنجره";
           } else {
             d.classList.remove("as-sidebar");
             if (main) main.style.marginLeft = "0";
+            toggleAsSidebarBtn.textContent = "نمایش به صورت سایدبار";
           }
         });
       }
@@ -1475,11 +1508,23 @@
         const d = document.getElementById("sheetDialog");
         if (!d) return;
         d.style.display = "flex";
+        // restore scroll
+        const list = document.getElementById("sheetListDialog");
+        if (list) list.scrollTop = sheetDialogScroll || 0;
+        // update toggle button text state
+        const t = document.getElementById("toggleSheetAsSidebar");
+        if (t)
+          t.textContent = d.classList.contains("as-sidebar")
+            ? "نمایش به صورت پنجره"
+            : "نمایش به صورت سایدبار";
       }
 
       function closeSheetDialog() {
         const d = document.getElementById("sheetDialog");
         if (!d) return;
+        // save scroll
+        const list = document.getElementById("sheetListDialog");
+        if (list) sheetDialogScroll = list.scrollTop;
         // if dialog was shown as sidebar, remove sidebar mode when closing
         if (d.classList.contains("as-sidebar")) {
           d.classList.remove("as-sidebar");
