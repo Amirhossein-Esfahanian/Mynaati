@@ -364,6 +364,29 @@
         margin-top: 6px;
       }
 
+      /* Word highlighting for TTS */
+      .lang-box .word {
+        padding: 2px 6px;
+        border-radius: 6px;
+        transition: background-color 0.12s ease, color 0.12s ease,
+          transform 0.12s ease;
+        display: inline-block;
+        margin: 0 2px;
+        white-space: pre-wrap;
+      }
+
+      .lang-box .word.speaking {
+        background: rgba(0, 122, 255, 0.12);
+        color: var(--accent);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+      }
+
+      .dialog-card.speaking {
+        outline: 2px solid rgba(0, 122, 255, 0.14);
+        box-shadow: 0 22px 50px rgba(0, 122, 255, 0.03);
+      }
+
       .lang-box.en {
         background: #eef6ff;
         direction: ltr;
@@ -969,6 +992,120 @@
         return (v ?? "").toString();
       }
 
+      // =========================
+      // TTS / Highlight helpers
+      // =========================
+      let currentUtter = null;
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function wrapWordsToSpans(text, containerEl) {
+        const tokens = text.match(/\S+|\s+/g) || [];
+        let pos = 0;
+        const wordsMeta = [];
+        const html = tokens
+          .map((tok) => {
+            if (/^\s+$/.test(tok)) {
+              pos += tok.length;
+              return tok;
+            }
+            const start = pos;
+            wordsMeta.push({ word: tok, start });
+            pos += tok.length;
+            return `<span class="word" data-start="${start}">${escapeHtml(
+              tok
+            )}</span>`;
+          })
+          .join("");
+        if (containerEl) {
+          containerEl.dataset.wordStarts = JSON.stringify(
+            wordsMeta.map((w) => w.start)
+          );
+        }
+        return html;
+      }
+
+      function clearHighlights(idx) {
+        const card = document.querySelector(`.dialog-card[data-idx="${idx}"]`);
+        if (!card) return;
+        card.classList.remove("speaking");
+        card
+          .querySelectorAll(".word.speaking")
+          .forEach((w) => w.classList.remove("speaking"));
+      }
+
+      function startTTS(idx, lang) {
+        // stop existing
+        if (!window.speechSynthesis) {
+          showToast("مرورگر شما از TTS پشتیبانی نمی‌کند");
+          return;
+        }
+        speechSynthesis.cancel();
+        currentUtter = null;
+        clearHighlights(idx);
+
+        const textEl = document.querySelector(
+          `#dialog_${idx} .lang-box.${lang} .text-run`
+        );
+        if (!textEl) return;
+        const text = textEl.innerText || textEl.textContent || "";
+        if (!text.trim()) {
+          showToast("متنی برای خواندن وجود ندارد");
+          return;
+        }
+
+        const starts = JSON.parse(textEl.dataset.wordStarts || "[]");
+
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = lang === "en" ? "en-US" : "fa-IR";
+
+        const card = document.querySelector(`.dialog-card[data-idx="${idx}"]`);
+        if (card) card.classList.add("speaking");
+
+        utt.onboundary = (ev) => {
+          if (!ev.charIndex) return;
+          // find the word index by start positions
+          let target = -1;
+          for (let i = 0; i < starts.length; i++) {
+            if (starts[i] <= ev.charIndex) target = i;
+            else break;
+          }
+          // highlight
+          const words = textEl.querySelectorAll(".word");
+          words.forEach((w) => w.classList.remove("speaking"));
+          if (target >= 0 && words[target]) {
+            words[target].classList.add("speaking");
+          }
+        };
+
+        utt.onend = () => {
+          if (card) card.classList.remove("speaking");
+          wordsCleanup(textEl);
+        };
+
+        utt.onerror = () => {
+          if (card) card.classList.remove("speaking");
+          wordsCleanup(textEl);
+        };
+
+        currentUtter = utt;
+        speechSynthesis.speak(utt);
+      }
+
+      function wordsCleanup(el) {
+        if (!el) return;
+        el.querySelectorAll(".word.speaking").forEach((w) =>
+          w.classList.remove("speaking")
+        );
+      }
+
       function setCurrentDialog(idx, scrollIntoView = true) {
         if (!dialogCount) return;
         currentDialogIndex = Math.max(1, Math.min(dialogCount, idx));
@@ -1402,6 +1539,17 @@
           btnSpeaker.addEventListener("click", () =>
             togglePlay(folderIndex, folderName, rowNum, senNum, btnSpeaker)
           );
+          const btnTTS = document.createElement("button");
+          btnTTS.className = "btn-circle btn-info";
+          btnTTS.type = "button";
+          btnTTS.title = "خواندن با صدای کامپیوتر";
+          btnTTS.innerHTML = `<ion-icon name="megaphone"></ion-icon>`;
+          btnTTS.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const enText = (en || "").trim();
+            if (enText) startTTS(idx, "en");
+            else startTTS(idx, "fa");
+          });
 
           const btnChat = document.createElement("button");
           btnChat.className = "btn-circle btn-chat";
@@ -1432,6 +1580,7 @@
           btnPlayRec.addEventListener("click", () => playRecorded(idx));
 
           right.appendChild(btnSpeaker);
+          right.appendChild(btnTTS);
           right.appendChild(btnChat);
           right.appendChild(btnInfo);
           right.appendChild(btnMic);
@@ -1448,14 +1597,16 @@
           boxEn.className = "lang-box en";
           boxEn.innerHTML = `<b>EN:</b> `;
           const enSpan = document.createElement("span");
-          enSpan.textContent = en;
+          enSpan.className = "text-run";
+          enSpan.innerHTML = wrapWordsToSpans(en, enSpan);
           boxEn.appendChild(enSpan);
 
           const boxFa = document.createElement("div");
           boxFa.className = "lang-box fa";
           boxFa.innerHTML = `<b>FA:</b> `;
           const faSpan = document.createElement("span");
-          faSpan.textContent = fa;
+          faSpan.className = "text-run";
+          faSpan.innerHTML = wrapWordsToSpans(fa, faSpan);
           boxFa.appendChild(faSpan);
 
           const recAudio = document.createElement("audio");

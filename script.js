@@ -102,7 +102,7 @@ function loadSheet(name, folderIndex) {
         <div style="display:flex;gap:6px;">
           <button class="btn-circle btn-speaker"
             onclick="togglePlay(${folderIndex}, '${folderName}', '${rowNum}', '${senNum}', this)">
-            <ion-icon name="volume-high"></ion-icon>
+            <ion-icon name="volume-high" ></ion-icon>
           </button>
           <button class="btn-circle btn-chat"
             onclick="toggleText(${idx})">
@@ -172,7 +172,7 @@ function togglePlay(folder, name, row, sen, btn) {
   currentAudio = new Audio(srcDash);
   currentBtn = btn;
 
-  btn.innerHTML = `<ion-icon name="stop"></ion-icon>`;
+  btn.innerHTML = `<ion-icon style="color: #ef4444;" name="stop"></ion-icon>`;
 
   // اگر با - لود نشد، با _ امتحان کن
   currentAudio.onerror = () => {
